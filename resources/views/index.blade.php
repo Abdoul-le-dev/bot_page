@@ -8,6 +8,13 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+    <div class="container">
+        <input type="text" id="msg" placeholder="Tape un texte">
+        <button id="send">Envoyer</button>
+        <pre id="result"></pre>
+    </div>
+
     <div class="container">
         <!-- SIDEBAR -->
         <div class="sidebar" id="sidebar">
@@ -105,15 +112,12 @@
         </div>
     </div>
 
-    <input type="text" id="msg" placeholder="Tape un texte">
-    <button id="send">Envoyer</button>
-    <pre id="result"></pre>
-
+    
     <script>
     document.getElementById('send').addEventListener('click', async () => {
     const text = document.getElementById('msg').value;
 
-    const response = await fetch('http://127.0.0.1:8000/process', {
+    const response = await fetch('http://bot.fiacrekpanoutrade.com/process', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text })
