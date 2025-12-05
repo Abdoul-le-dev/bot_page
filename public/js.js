@@ -23,7 +23,7 @@ let conversations =
         id: 1,
         name: "Jean Dupont",
         userId: "123456",
-        lastMessage: "Voici quelques photos de mon projet 📸",
+        lastMessage: "Voici quelquess photos de mon projet 📸",
         time: "14:23",
         unread: 2,
         messages: [
