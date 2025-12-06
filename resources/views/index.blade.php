@@ -109,20 +109,7 @@
     </div>
 
     
-    <script>
-    document.getElementById('send').addEventListener('click', async () => {
-    const text = document.getElementById('msg').value;
-
-    const response = await fetch('http://bot.fiacrekpanoutrade.com/process', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text })
-    });
-
-    const data = await response.json();
-    document.getElementById('result').textContent = JSON.stringify(data, null, 2);
-    });
-    </script>
+    
 
 
     <script src="js.js"></script>
