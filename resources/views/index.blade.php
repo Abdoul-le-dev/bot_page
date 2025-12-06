@@ -9,11 +9,7 @@
 </head>
 <body>
 
-    <div class="container">
-        <input type="text" id="msg" placeholder="Tape un texte">
-        <button id="send">Envoyer</button>
-        <pre id="result"></pre>
-    </div>
+    
 
     <div class="container">
         <!-- SIDEBAR -->
