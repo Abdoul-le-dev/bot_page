@@ -202,9 +202,9 @@ body {
 /* BOUTON RETOUR MOBILE */
 .mobile-back-btn {
     display: none;
-    position: absolute;
-    top: 24px;
-    left: 16px;
+    position: fixed;
+    top: 12px;
+    left: 12px;
     z-index: 1000;
     background: white;
     border: 1.5px solid var(--border);
@@ -751,8 +751,7 @@ body {
     }
 
     .chat-header {
-        padding: 16px;
-        padding-left: 72px;
+        padding: 60px 16px 16px 16px;
     }
 
     .chat-user-info h2 {
@@ -769,6 +768,7 @@ body {
 
     .messages-container {
         padding: 16px;
+        padding-top: 60px;
     }
 
     .message-content {
@@ -824,8 +824,26 @@ body {
     }
 
     .emoji-item {
-        font-size: 20px;
+        font-size: 24px;
+    }
+
+    .chat-header {
+        padding: 60px 12px 12px 12px;
+    }
+
+    .messages-container {
+        padding: 12px;
+        padding-top: 60px;
+    }
+
+    .input-area {
+        padding: 12px;
+    }
+
+    .mobile-back-btn {
+        top: 8px;
+        left: 8px;
+        padding: 6px 12px;
+        font-size: 13px;
     }
 }
-
-
