@@ -112,7 +112,7 @@
     
     <script>
     document.getElementById('send').addEventListener('click', async () => {
-    const text = document.getElementById('msg').value;
+    const text = 'document.getElementById('msg').value';
 
     const response = await fetch('http://bot.fiacrekpanoutrade.com/process', {
         method: 'POST',
