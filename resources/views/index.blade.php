@@ -17,6 +17,7 @@
             <div class="header">
                 <h1>Messages</h1>
                 <div class="subtitle">Telegram Bot Manager</div>
+                <button id="send">yes </button>
             </div>
             
             <div class="search-box">
