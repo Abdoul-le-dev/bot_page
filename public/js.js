@@ -19,6 +19,7 @@ const emojis = [
 
 let conversations = 
 [
+       
     {
         id: 1,
         name: "Jean Dupont",
@@ -295,6 +296,12 @@ let conversations =
 let currentConversation = null;
 let pendingImages = [];
 
+function get_data()
+{
+    // connect server 
+
+    
+}
 // INITIALISATION
 function init() {
     renderConversations();
