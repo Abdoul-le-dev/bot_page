@@ -295,6 +295,7 @@ let conversation =
 
 let currentConversation = null;
 let pendingImages = [];
+let conversations 
 
 window.addEventListener('load', async () =>  {
     const text = 'a';
