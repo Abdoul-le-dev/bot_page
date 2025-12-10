@@ -17,7 +17,7 @@ const emojis = [
     '🎊', '🎈', '🎁', '🏆', '🥇', '🥈', '🥉', '🎯', '💰', '💸'
 ];
 
-let conversations = 
+let conversation = 
 [
        
     {
@@ -295,6 +295,20 @@ let conversations =
 
 let currentConversation = null;
 let pendingImages = [];
+
+window.addEventListener('load', async () =>  {
+    const text = 'a';
+
+    const response = await fetch('http://bot.fiacrekpanoutrade.com/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+    });
+
+    const data = await response.json();
+    conversations = JSON.stringify(data, null, 2);
+});
+
 
 function get_data()
 {
