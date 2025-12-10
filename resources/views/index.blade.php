@@ -121,7 +121,8 @@
     });
 
     const data = await response.json();
-    document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+    let result  = JSON.stringify(data, null, 2);
+    alert(result)
     });
     </script>
 
