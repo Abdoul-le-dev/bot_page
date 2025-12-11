@@ -385,7 +385,7 @@ async function renderConversations() {
     });
 
     const data = await response.json();
-    let conversations = data
+    let conversations = JSON.parse(data);
 
     
 
