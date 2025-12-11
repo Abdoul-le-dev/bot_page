@@ -385,7 +385,9 @@ async function renderConversations() {
     });
 
     const data = await response.json();
-    let conversations = JSON.stringify(data, null, 2);
+    let conversations = data
+
+    
 
     conversations.forEach((conv, index) => {
         const item = document.createElement('div');
