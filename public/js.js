@@ -295,7 +295,7 @@ let conversation =
 
 let currentConversation = null;
 let pendingImages = [];
-let conversations ={}
+//let conversations ={}
 
 window.addEventListener('load', async () =>  {
     const text = 'a';
@@ -370,9 +370,22 @@ function insertEmoji(emoji) {
 }
 
 // AFFICHER LES CONVERSATIONS
-function renderConversations() {
+async function renderConversations() {
     const list = document.getElementById('conversationsList');
     list.innerHTML = '';
+
+    
+
+    const text = 'a';
+
+    const response = await fetch('http://bot.fiacrekpanoutrade.com/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+    });
+
+    const data = await response.json();
+    let conversations = JSON.stringify(data, null, 2);
 
     conversations.forEach((conv, index) => {
         const item = document.createElement('div');
