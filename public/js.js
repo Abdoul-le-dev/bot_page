@@ -295,7 +295,7 @@ let conversation =
 
 let currentConversation = null;
 let pendingImages = [];
-//let conversations ={}
+let conversations ={}
 
 window.addEventListener('load', async () =>  {
     const text = 'a';
@@ -385,7 +385,7 @@ async function renderConversations() {
     });
 
     const data = await response.json();
-    let conversations = JSON.parse(data);
+    conversations = JSON.parse(data);
 
     
 
@@ -413,7 +413,18 @@ async function renderConversations() {
 }
 
 // SÉLECTIONNER UNE CONVERSATION
-function selectConversation(id) {
+async function selectConversation(userId) {
+
+    
+
+    const response = await fetch('http://bot.fiacrekpanoutrade.com/user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId })
+    });
+
+    let data = JSON.parse(data)
+
     currentConversation = conversations.find(c => c.id === id);
     if (!currentConversation) return;
 
