@@ -371,6 +371,7 @@ function insertEmoji(emoji) {
 
 // AFFICHER LES CONVERSATIONS
 async function renderConversations() {
+
     const list = document.getElementById('conversationsList');
     list.innerHTML = '';
 
@@ -413,9 +414,9 @@ async function renderConversations() {
 }
 
 // SÉLECTIONNER UNE CONVERSATION
-async function selectConversations(id) {
+async function selectConversation(id) {
 
-    userId =id 
+    userId = id 
    
 
     const response = await fetch('http://bot.fiacrekpanoutrade.com/user', {
@@ -424,11 +425,7 @@ async function selectConversations(id) {
         body: JSON.stringify({ userId })
     });
 
-    const data = await response.json();
-
-    alert(data)
-
-    conversations = data
+    const conversations  = await response.json();
 
     currentConversation = conversations.find(c => c.id === id);
     if (!currentConversation) return;
@@ -449,7 +446,7 @@ async function selectConversations(id) {
     renderConversations();
 }
 // SÉLECTIONNER UNE CONVERSATION
-async function selectConversation(id) {
+async function selectConversations(id) {
   const userId = id;
 
   let response;
