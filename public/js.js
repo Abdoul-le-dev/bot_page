@@ -416,7 +416,7 @@ async function renderConversations() {
 async function selectConversation(id) {
 
     userId =id 
-    alert(userId)
+   
 
     const response = await fetch('http://bot.fiacrekpanoutrade.com/user', {
         method: 'POST',
@@ -424,7 +424,9 @@ async function selectConversation(id) {
         body: JSON.stringify({ userId })
     });
 
-    let data = JSON.parse(data_user)
+    const data = await response.json();
+
+    conversations = JSON.parse(data)
 
     currentConversation = conversations.find(c => c.id === id);
     if (!currentConversation) return;
