@@ -413,7 +413,7 @@ async function renderConversations() {
 }
 
 // SÉLECTIONNER UNE CONVERSATION
-async function selectConversation(id) {
+async function selectConversations(id) {
 
     userId =id 
    
@@ -448,6 +448,59 @@ async function selectConversation(id) {
     renderMessages();
     renderConversations();
 }
+// SÉLECTIONNER UNE CONVERSATION
+async function selectConversation(id) {
+  const userId = id;
+
+  let response;
+  try {
+    response = await fetch('https://bot.fiacrekpanoutrade.com/user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId })
+    });
+  } catch (e) {
+    console.log("Fetch failed:", e);
+    alert("Erreur réseau: impossible de joindre l'API");
+    return;
+  }
+
+  if (!response.ok) {
+    const txt = await response.text();
+    console.log("Backend error:", response.status, txt);
+    alert("Erreur API: " + response.status);
+    return;
+  }
+
+  const data = await response.json();
+
+  // ✅ Debug propre (au lieu de alert(data))
+  console.log("API data:", data);
+  alert(JSON.stringify(data, null, 2)); // si tu veux vraiment voir
+
+  // ✅ Garantir un tableau
+  const conversations = Array.isArray(data) ? data : (data?.conversations ?? []);
+
+  // ✅ Comparaison robuste (string vs number)
+  const currentConversation = conversations.find(c => String(c.id) === String(id));
+  if (!currentConversation) return;
+
+  currentConversation.unread = 0;
+
+  // Mobile: Cacher la sidebar et afficher le chat
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebar').classList.add('hidden');
+    document.getElementById('chatArea').classList.remove('hidden');
+  }
+
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('chatContainer').style.display = 'flex';
+  document.getElementById('chatUserName').textContent = currentConversation.name;
+
+  renderMessages();
+  renderConversations();
+}
+
 
 // RETOUR AUX CONVERSATIONS (MOBILE)
 function goBackToConversations() {
