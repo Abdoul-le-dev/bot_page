@@ -426,7 +426,9 @@ async function selectConversation(id) {
 
     const data = await response.json();
 
-    conversations = JSON.parse(data)
+    alerte(data)
+
+    conversations = data
 
     currentConversation = conversations.find(c => c.id === id);
     if (!currentConversation) return;
