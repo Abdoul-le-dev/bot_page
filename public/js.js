@@ -426,7 +426,7 @@ async function selectConversation(id) {
 
     const data = await response.json();
 
-    alerte(data)
+    alert(data)
 
     conversations = data
 
