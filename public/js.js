@@ -169,6 +169,7 @@ async function selectConversation(id) {
         const conversationsList = Array.isArray(data) ? data : (data?.conversations ?? []);
         
         // Trouver la conversation (comparaison string pour éviter les problèmes de types)
+
         currentConversation = conversationsList.find(c => String(c.id) === String(id));
         
         if (!currentConversation) {
