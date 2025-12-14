@@ -17,311 +17,55 @@ const emojis = [
     '🎊', '🎈', '🎁', '🏆', '🥇', '🥈', '🥉', '🎯', '💰', '💸'
 ];
 
-let conversation = 
-[
-       
-    {
-        id: 1,
-        name: "Jean Dupont",
-        userId: "123456",
-        lastMessage: "Voici quelquess photos de mon projet 📸",
-        time: "14:23",
-        unread: 2,
-        messages: [
-            { 
-                id: 1, 
-                text: "Bonjour ! 👋 Comment allez-vous ?", 
-                type: "received", 
-                time: "14:10" 
-            },
-            { 
-                id: 2, 
-                text: "Bonjour Jean ! Je vais très bien merci 😊 Et vous ?", 
-                type: "sent", 
-                time: "14:11" 
-            },
-            { 
-                id: 3, 
-                text: "Très bien aussi ! J'aimerais avoir des informations sur vos services", 
-                type: "received", 
-                time: "14:12" 
-            },
-            { 
-                id: 4, 
-                text: "Bien sûr ! Je serais ravi de vous aider. Quel type de service vous intéresse particulièrement ? 🤔", 
-                type: "sent", 
-                time: "14:13" 
-            },
-            { 
-                id: 5, 
-                text: "Voici quelques photos de mon projet 📸", 
-                type: "received", 
-                time: "14:23",
-                images: [
-                    "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=500&h=300&fit=crop",
-                    "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=500&h=300&fit=crop"
-                ]
-            }
-        ]
-    },
-    {
-        id: 2,
-        name: "Marie Martin",
-        userId: "789012",
-        lastMessage: "Merci beaucoup pour votre aide ! 🙏",
-        time: "13:45",
-        unread: 0,
-        messages: [
-            { 
-                id: 1, 
-                text: "Bonjour, j'ai une question concernant la facturation 💰", 
-                type: "received", 
-                time: "13:30" 
-            },
-            { 
-                id: 2, 
-                text: "Bonjour Marie ! 😊 Je vous écoute, quelle est votre question ?", 
-                type: "sent", 
-                time: "13:32" 
-            },
-            { 
-                id: 3, 
-                text: "Est-ce que je peux payer en plusieurs fois ?", 
-                type: "received", 
-                time: "13:35" 
-            },
-            { 
-                id: 4, 
-                text: "Oui bien sûr ! Nous proposons des paiements en 2, 3 ou 4 fois sans frais 💳", 
-                type: "sent", 
-                time: "13:37" 
-            },
-            { 
-                id: 5, 
-                text: "Voici un exemple de notre interface de paiement", 
-                type: "sent", 
-                time: "13:38",
-                images: [
-                    "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=500&h=300&fit=crop"
-                ]
-            },
-            { 
-                id: 6, 
-                text: "Parfait ! C'est exactement ce que je cherchais 😍", 
-                type: "received", 
-                time: "13:42" 
-            },
-            { 
-                id: 7, 
-                text: "Merci beaucoup pour votre aide ! 🙏", 
-                type: "received", 
-                time: "13:45" 
-            }
-        ]
-    },
-    {
-        id: 3,
-        name: "Pierre Leroy",
-        userId: "345678",
-        lastMessage: "Voilà les documents demandés 📄",
-        time: "12:15",
-        unread: 0,
-        messages: [
-            { 
-                id: 1, 
-                text: "Bonjour ! J'ai besoin de quelques documents pour finaliser mon dossier 📋", 
-                type: "received", 
-                time: "12:00" 
-            },
-            { 
-                id: 2, 
-                text: "Pas de problème Pierre ! Quels documents vous faut-il exactement ?", 
-                type: "sent", 
-                time: "12:02" 
-            },
-            { 
-                id: 3, 
-                text: "J'aurais besoin du contrat et de la facture pro forma", 
-                type: "received", 
-                time: "12:05" 
-            },
-            { 
-                id: 4, 
-                text: "Voici les informations que vous avez demandées ✅", 
-                type: "sent", 
-                time: "12:10" 
-            },
-            { 
-                id: 5, 
-                text: "Voilà les documents demandés 📄", 
-                type: "received", 
-                time: "12:15",
-                images: [
-                    "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=500&h=300&fit=crop",
-                    "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=500&h=300&fit=crop",
-                    "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=500&h=300&fit=crop"
-                ]
-            }
-        ]
-    },
-    {
-        id: 4,
-        name: "Sophie Dubois",
-        userId: "901234",
-        lastMessage: "Super ! J'adore ce design 🎨",
-        time: "11:30",
-        unread: 1,
-        messages: [
-            { 
-                id: 1, 
-                text: "Salut ! J'ai terminé les maquettes du site web 🎨", 
-                type: "received", 
-                time: "11:20" 
-            },
-            { 
-                id: 2, 
-                text: "Génial Sophie ! Montre-moi ça 👀", 
-                type: "sent", 
-                time: "11:22" 
-            },
-            { 
-                id: 3, 
-                text: "Voilà les designs ! Qu'est-ce que tu en penses ?", 
-                type: "received", 
-                time: "11:25",
-                images: [
-                    "https://images.unsplash.com/photo-1547658719-da2b51169166?w=500&h=300&fit=crop",
-                    "https://images.unsplash.com/photo-1559028012-481c04fa702d?w=500&h=300&fit=crop"
-                ]
-            },
-            { 
-                id: 4, 
-                text: "Wow ! C'est magnifique 😍 Les couleurs sont parfaites !", 
-                type: "sent", 
-                time: "11:27" 
-            },
-            { 
-                id: 5, 
-                text: "Super ! J'adore ce design 🎨", 
-                type: "received", 
-                time: "11:30" 
-            }
-        ]
-    },
-    {
-        id: 5,
-        name: "Thomas Bernard",
-        userId: "567890",
-        lastMessage: "Ok merci pour l'info 👍",
-        time: "10:45",
-        unread: 0,
-        messages: [
-            { 
-                id: 1, 
-                text: "Hello ! Une petite question rapide ⚡", 
-                type: "received", 
-                time: "10:30" 
-            },
-            { 
-                id: 2, 
-                text: "Salut Thomas ! Je t'écoute 😊", 
-                type: "sent", 
-                time: "10:32" 
-            },
-            { 
-                id: 3, 
-                text: "C'est quoi les horaires d'ouverture de votre support ? 🕐", 
-                type: "received", 
-                time: "10:35" 
-            },
-            { 
-                id: 4, 
-                text: "Nous sommes disponibles du lundi au vendredi de 9h à 18h 📅\nEt le samedi de 10h à 16h !", 
-                type: "sent", 
-                time: "10:37" 
-            },
-            { 
-                id: 5, 
-                text: "Parfait ! Et pour les urgences le weekend ? 🆘", 
-                type: "received", 
-                time: "10:40" 
-            },
-            { 
-                id: 6, 
-                text: "Pour les urgences, nous avons une hotline disponible 24/7 au 01 23 45 67 89 ☎️", 
-                type: "sent", 
-                time: "10:42" 
-            },
-            { 
-                id: 7, 
-                text: "Ok merci pour l'info 👍", 
-                type: "received", 
-                time: "10:45" 
-            }
-        ]
-    },
-    {
-        id: 6,
-        name: "Isabelle Petit",
-        userId: "234567",
-        lastMessage: "J'attends ta réponse 😊",
-        time: "09:15",
-        unread: 3,
-        messages: [
-            { 
-                id: 1, 
-                text: "Coucou ! J'ai une proposition de collaboration à te faire 🤝", 
-                type: "received", 
-                time: "09:00" 
-            },
-            { 
-                id: 2, 
-                text: "Regarde ce projet, je pense que ça pourrait t'intéresser 💡", 
-                type: "received", 
-                time: "09:10",
-                images: [
-                    "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&h=300&fit=crop"
-                ]
-            },
-            { 
-                id: 3, 
-                text: "J'attends ta réponse 😊", 
-                type: "received", 
-                time: "09:15" 
-            }
-        ]
-    }
-];
-
+// DONNÉES DES CONVERSATIONS (chargées depuis l'API)
+let conversations = [];
 let currentConversation = null;
 let pendingImages = [];
-let conversations ={}
 
-window.addEventListener('load', async () =>  {
-    const text = 'a';
-
-    const response = await fetch('http://bot.fiacrekpanoutrade.com/process', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text })
-    });
-
-    const data = await response.json();
-    conversations = JSON.stringify(data, null, 2);
-});
-
-
-function get_data()
-{
-    // connect server 
-
-    
-}
 // INITIALISATION
 function init() {
-    renderConversations();
+    loadConversations(); // Charger les conversations au démarrage
     setupEventListeners();
     initEmojiPicker();
+}
+
+// CHARGER LES CONVERSATIONS DEPUIS L'API
+async function loadConversations() {
+    try {
+        const response = await fetch('http://bot.fiacrekpanoutrade.com/process', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: 'a' })
+        });
+
+        if (!response.ok) {
+            console.error('Erreur API:', response.status);
+            return;
+        }
+
+        const data = await response.json();
+        
+        // Le backend retourne directement un tableau
+        conversations = Array.isArray(data) ? data : [];
+        
+        // Adapter les messages pour avoir le bon format de type
+        conversations.forEach(conv => {
+            if (conv.messages && Array.isArray(conv.messages)) {
+                conv.messages = conv.messages.map(msg => ({
+                    ...msg,
+                    type: msg.type === 'TEXT' || msg.type === 'text' ? 'received' : msg.type
+                }));
+            }
+            // Définir le dernier message si null
+            if (!conv.lastMessage && conv.messages && conv.messages.length > 0) {
+                conv.lastMessage = conv.messages[conv.messages.length - 1].text;
+            }
+        });
+
+        renderConversations();
+    } catch (error) {
+        console.error('Erreur lors du chargement des conversations:', error);
+    }
 }
 
 // INITIALISER LE PICKER D'EMOJIS
@@ -370,30 +114,19 @@ function insertEmoji(emoji) {
 }
 
 // AFFICHER LES CONVERSATIONS
-async function renderConversations() {
-
+function renderConversations() {
     const list = document.getElementById('conversationsList');
     list.innerHTML = '';
 
-    
-
-    const text = 'a';
-
-    const response = await fetch('http://bot.fiacrekpanoutrade.com/process', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text })
-    });
-
-    const data = await response.json();
-    conversations = JSON.parse(data);
-
-    
+    if (conversations.length === 0) {
+        list.innerHTML = '<div style="padding: 24px; text-align: center; color: #999;">Aucune conversation</div>';
+        return;
+    }
 
     conversations.forEach((conv, index) => {
         const item = document.createElement('div');
         item.className = 'conversation-item';
-        if (currentConversation && currentConversation.id === conv.id) {
+        if (currentConversation && String(currentConversation.id) === String(conv.id)) {
             item.classList.add('active');
         }
         
@@ -401,10 +134,10 @@ async function renderConversations() {
 
         item.innerHTML = `
             <div class="conv-header">
-                <div class="conv-name">${conv.name}</div>
-                <div class="conv-time">${conv.time}</div>
+                <div class="conv-name">${conv.name || 'Utilisateur'}</div>
+                <div class="conv-time">${conv.time || ''}</div>
             </div>
-            <div class="conv-preview">${conv.lastMessage}</div>
+            <div class="conv-preview">${conv.lastMessage || 'Pas de message'}</div>
             ${conv.unread > 0 ? `<span class="unread-badge">${conv.unread} nouveau${conv.unread > 1 ? 'x' : ''}</span>` : ''}
         `;
 
@@ -415,89 +148,62 @@ async function renderConversations() {
 
 // SÉLECTIONNER UNE CONVERSATION
 async function selectConversation(id) {
+    try {
+        const userId = id;
 
-    userId = id 
-   
+        const response = await fetch('http://bot.fiacrekpanoutrade.com/user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId })
+        });
 
-    const response = await fetch('http://bot.fiacrekpanoutrade.com/user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId })
-    });
+        if (!response.ok) {
+            console.error('Erreur API:', response.status);
+            alert('Erreur lors du chargement de la conversation');
+            return;
+        }
 
-    const conversations  = await response.json();
+        const data = await response.json();
+        
+        // Le backend peut retourner soit un tableau, soit un objet avec conversations
+        const conversationsList = Array.isArray(data) ? data : (data?.conversations ?? []);
+        
+        // Trouver la conversation (comparaison string pour éviter les problèmes de types)
+        currentConversation = conversationsList.find(c => String(c.id) === String(id));
+        
+        if (!currentConversation) {
+            console.error('Conversation non trouvée');
+            return;
+        }
 
-    currentConversation = conversations.find(c => c.id === id);
-    if (!currentConversation) return;
+        // Adapter les messages
+        if (currentConversation.messages && Array.isArray(currentConversation.messages)) {
+            currentConversation.messages = currentConversation.messages.map(msg => ({
+                ...msg,
+                type: msg.type === 'TEXT' || msg.type === 'text' ? 'received' : msg.type
+            }));
+        }
 
-    currentConversation.unread = 0;
+        currentConversation.unread = 0;
 
-    // Mobile: Cacher la sidebar et afficher le chat
-    if (window.innerWidth <= 768) {
-        document.getElementById('sidebar').classList.add('hidden');
-        document.getElementById('chatArea').classList.remove('hidden');
+        // Mobile: Cacher la sidebar et afficher le chat
+        if (window.innerWidth <= 768) {
+            document.getElementById('sidebar').classList.add('hidden');
+            document.getElementById('chatArea').classList.remove('hidden');
+        }
+
+        document.getElementById('emptyState').style.display = 'none';
+        document.getElementById('chatContainer').style.display = 'flex';
+        document.getElementById('chatUserName').textContent = currentConversation.name || 'Utilisateur';
+
+        renderMessages();
+        renderConversations();
+        
+    } catch (error) {
+        console.error('Erreur lors de la sélection de la conversation:', error);
+        alert('Erreur réseau');
     }
-
-    document.getElementById('emptyState').style.display = 'none';
-    document.getElementById('chatContainer').style.display = 'flex';
-    document.getElementById('chatUserName').textContent = currentConversation.name;
-
-    renderMessages();
-    renderConversations();
 }
-// SÉLECTIONNER UNE CONVERSATION
-async function selectConversations(id) {
-  const userId = id;
-
-  let response;
-  try {
-    response = await fetch('https://bot.fiacrekpanoutrade.com/user', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId })
-    });
-  } catch (e) {
-    console.log("Fetch failed:", e);
-    alert("Erreur réseau: impossible de joindre l'API");
-    return;
-  }
-
-  if (!response.ok) {
-    const txt = await response.text();
-    console.log("Backend error:", response.status, txt);
-    alert("Erreur API: " + response.status);
-    return;
-  }
-
-  const data = await response.json();
-
-  // ✅ Debug propre (au lieu de alert(data))
-  console.log("API data:", data);
-  alert(JSON.stringify(data, null, 2)); // si tu veux vraiment voir
-
-  // ✅ Garantir un tableau
-  const conversations = Array.isArray(data) ? data : (data?.conversations ?? []);
-
-  // ✅ Comparaison robuste (string vs number)
-  const currentConversation = conversations.find(c => String(c.id) === String(id));
-  if (!currentConversation) return;
-
-  currentConversation.unread = 0;
-
-  // Mobile: Cacher la sidebar et afficher le chat
-  if (window.innerWidth <= 768) {
-    document.getElementById('sidebar').classList.add('hidden');
-    document.getElementById('chatArea').classList.remove('hidden');
-  }
-
-  document.getElementById('emptyState').style.display = 'none';
-  document.getElementById('chatContainer').style.display = 'flex';
-  document.getElementById('chatUserName').textContent = currentConversation.name;
-
-  renderMessages();
-  renderConversations();
-}
-
 
 // RETOUR AUX CONVERSATIONS (MOBILE)
 function goBackToConversations() {
@@ -510,6 +216,10 @@ function goBackToConversations() {
 function renderMessages() {
     const container = document.getElementById('messagesContainer');
     container.innerHTML = '';
+
+    if (!currentConversation || !currentConversation.messages) {
+        return;
+    }
 
     currentConversation.messages.forEach((msg, index) => {
         const messageDiv = document.createElement('div');
@@ -533,9 +243,9 @@ function renderMessages() {
             <div class="message-content">
                 <div class="message-bubble">
                     ${imagesHTML}
-                    ${msg.text}
+                    ${msg.text || ''}
                 </div>
-                <div class="message-time">${msg.time}</div>
+                <div class="message-time">${msg.time || ''}</div>
             </div>
         `;
 
@@ -546,7 +256,7 @@ function renderMessages() {
 }
 
 // ENVOYER UN MESSAGE
-function sendMessage() {
+async function sendMessage() {
     const input = document.getElementById('messageInput');
     const text = input.value.trim();
     const caption = document.getElementById('imageCaption').value.trim();
@@ -583,9 +293,9 @@ function sendMessage() {
 
     // Envoyer à Telegram
     if (newMessage.images) {
-        sendImagesToTelegram(currentConversation.userId, newMessage.images, newMessage.text);
+        await sendImagesToTelegram(currentConversation.userId, newMessage.images, newMessage.text);
     } else {
-        sendToTelegram(currentConversation.userId, text);
+        await sendToTelegram(currentConversation.userId, text);
     }
 }
 
@@ -598,8 +308,6 @@ function handleImageUpload(event) {
     const imagePreviewContainer = document.getElementById('imagePreviewContainer');
     const imagePreview = document.getElementById('imagePreview');
 
-    // Pour la démo, on affiche seulement la première image en preview
-    // Mais on garde toutes les images dans pendingImages
     Array.from(files).forEach(file => {
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -628,7 +336,6 @@ function openLightbox(imageSrc) {
     const lightboxImage = document.getElementById('lightboxImage');
     lightboxImage.src = imageSrc;
     lightbox.classList.add('active');
-    // Sauvegarder l'URL pour le téléchargement
     lightbox.dataset.currentImage = imageSrc;
 }
 
@@ -651,42 +358,46 @@ function downloadImage(event) {
 }
 
 // FONCTIONS À INTÉGRER AVEC VOTRE BACKEND
-function sendToTelegram(userId, text) {
-    console.log('Envoi à Telegram:', { userId, text });
-    
-    // Exemple d'appel API:
-    /*
-    fetch('/api/send-message', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, text })
-    });
-    */
+async function sendToTelegram(userId, text) {
+    try {
+        const response = await fetch('http://bot.fiacrekpanoutrade.com/send-message', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, text })
+        });
+
+        if (!response.ok) {
+            console.error('Erreur envoi message:', response.status);
+        }
+    } catch (error) {
+        console.error('Erreur lors de l\'envoi du message:', error);
+    }
 }
 
-function sendImagesToTelegram(userId, images, caption) {
-    console.log('Envoi images à Telegram:', { userId, images, caption });
-    
-    // Exemple d'appel API:
-    /*
-    const formData = new FormData();
-    formData.append('userId', userId);
-    formData.append('caption', caption || '');
-    
-    images.forEach((img, index) => {
-        // Convertir base64 en blob si nécessaire
-        fetch(img)
-            .then(res => res.blob())
-            .then(blob => {
-                formData.append(`image${index}`, blob);
-            });
-    });
-    
-    fetch('/api/send-images', {
-        method: 'POST',
-        body: formData
-    });
-    */
+async function sendImagesToTelegram(userId, images, caption) {
+    try {
+        const formData = new FormData();
+        formData.append('userId', userId);
+        formData.append('caption', caption || '');
+        
+        // Convertir les images base64 en blobs
+        for (let i = 0; i < images.length; i++) {
+            const response = await fetch(images[i]);
+            const blob = await response.blob();
+            formData.append(`image${i}`, blob, `image${i}.jpg`);
+        }
+        
+        const response = await fetch('http://bot.fiacrekpanoutrade.com/send-images', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            console.error('Erreur envoi images:', response.status);
+        }
+    } catch (error) {
+        console.error('Erreur lors de l\'envoi des images:', error);
+    }
 }
 
 // AUTRES ACTIONS
@@ -754,33 +465,10 @@ function setupEventListeners() {
         }
     });
 
-    // WebSocket pour messages en temps réel (à implémenter)
-    /*
-    const socket = new WebSocket('ws://votre-serveur.com');
-    socket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        // Ajouter le nouveau message à la conversation appropriée
-        const conv = conversations.find(c => c.userId === data.userId);
-        if (conv) {
-            conv.messages.push({
-                id: Date.now(),
-                text: data.text,
-                type: 'received',
-                time: data.time,
-                images: data.images
-            });
-            conv.lastMessage = data.text || '📷 Photo';
-            conv.time = data.time;
-            conv.unread += 1;
-            
-            if (currentConversation && currentConversation.id === conv.id) {
-                renderMessages();
-                conv.unread = 0;
-            }
-            renderConversations();
-        }
-    };
-    */
+    // Actualiser les conversations toutes les 30 secondes
+    setInterval(() => {
+        loadConversations();
+    }, 30000);
 }
 
 function handleResize() {
