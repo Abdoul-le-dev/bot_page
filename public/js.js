@@ -17,55 +17,15 @@ const emojis = [
     '🎊', '🎈', '🎁', '🏆', '🥇', '🥈', '🥉', '🎯', '💰', '💸'
 ];
 
-// DONNÉES DES CONVERSATIONS (chargées depuis l'API)
 let conversations = [];
 let currentConversation = null;
 let pendingImages = [];
 
 // INITIALISATION
-function init() {
-    loadConversations(); // Charger les conversations au démarrage
+async function init() {
+    await renderConversations(); // Attendre le chargement des conversations
     setupEventListeners();
     initEmojiPicker();
-}
-
-// CHARGER LES CONVERSATIONS DEPUIS L'API
-async function loadConversations() {
-    try {
-        const response = await fetch('http://bot.fiacrekpanoutrade.com/process', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: 'a' })
-        });
-
-        if (!response.ok) {
-            console.error('Erreur API:', response.status);
-            return;
-        }
-
-        const data = await response.json();
-        
-        // Le backend retourne directement un tableau
-        conversations = Array.isArray(data) ? data : [];
-        
-        // Adapter les messages pour avoir le bon format de type
-        conversations.forEach(conv => {
-            if (conv.messages && Array.isArray(conv.messages)) {
-                conv.messages = conv.messages.map(msg => ({
-                    ...msg,
-                    type: msg.type === 'TEXT' || msg.type === 'text' ? 'received' : msg.type
-                }));
-            }
-            // Définir le dernier message si null
-            if (!conv.lastMessage && conv.messages && conv.messages.length > 0) {
-                conv.lastMessage = conv.messages[conv.messages.length - 1].text;
-            }
-        });
-
-        renderConversations();
-    } catch (error) {
-        console.error('Erreur lors du chargement des conversations:', error);
-    }
 }
 
 // INITIALISER LE PICKER D'EMOJIS
@@ -85,7 +45,6 @@ function toggleEmojiPicker() {
     const emojiPicker = document.getElementById('emojiPicker');
     if (emojiPicker.style.display === 'none' || !emojiPicker.style.display) {
         emojiPicker.style.display = 'block';
-        // Fermer au clic en dehors
         setTimeout(() => {
             document.addEventListener('click', closeEmojiPickerOnClickOutside);
         }, 100);
@@ -114,70 +73,141 @@ function insertEmoji(emoji) {
 }
 
 // AFFICHER LES CONVERSATIONS
-function renderConversations() {
+async function renderConversations() {
     const list = document.getElementById('conversationsList');
-    list.innerHTML = '';
-
-    if (conversations.length === 0) {
-        list.innerHTML = '<div style="padding: 24px; text-align: center; color: #999;">Aucune conversation</div>';
+    console.log('Element conversationsList:', list); // Debug
+    
+    if (!list) {
+        console.error('Element conversationsList non trouvé dans le DOM!');
         return;
     }
+    
+    list.innerHTML = '';
 
-    conversations.forEach((conv, index) => {
-        const item = document.createElement('div');
-        item.className = 'conversation-item';
-        if (currentConversation && String(currentConversation.id) === String(conv.id)) {
-            item.classList.add('active');
+    try {
+        console.log('Envoi de la requête à l\'API...');
+        
+        const response = await fetch('https://bot.fiacrekpanoutrade.com/process', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: 'a' })
+        });
+
+        console.log('Réponse reçue, status:', response.status);
+
+        if (!response.ok) {
+            console.error('Erreur API:', response.status);
+            list.innerHTML = '<div style="padding: 24px; text-align: center; color: #999;">Erreur de chargement</div>';
+            return;
+        }
+
+        const data = await response.json();
+        console.log('Données brutes reçues:', data);
+        console.log('Type de data:', typeof data);
+        console.log('Est-ce un tableau?', Array.isArray(data));
+        
+        // Si data est une string JSON, la parser
+        if (typeof data === 'string') {
+            conversations = JSON.parse(data);
+        } else if (Array.isArray(data)) {
+            conversations = data;
+        } else {
+            conversations = [];
         }
         
-        item.style.animationDelay = `${index * 0.05}s`;
+        console.log('Conversations après parsing:', conversations);
+        console.log('Nombre de conversations:', conversations.length);
 
-        item.innerHTML = `
-            <div class="conv-header">
-                <div class="conv-name">${conv.name || 'Utilisateur'}</div>
-                <div class="conv-time">${conv.time || ''}</div>
-            </div>
-            <div class="conv-preview">${conv.lastMessage || 'Pas de message'}</div>
-            ${conv.unread > 0 ? `<span class="unread-badge">${conv.unread} nouveau${conv.unread > 1 ? 'x' : ''}</span>` : ''}
-        `;
+        if (conversations.length === 0) {
+            list.innerHTML = '<div style="padding: 24px; text-align: center; color: #999;">Aucune conversation</div>';
+            return;
+        }
 
-        item.onclick = () => selectConversation(conv.id);
-        list.appendChild(item);
-    });
+        conversations.forEach((conv, index) => {
+            console.log(`Création de l'item ${index}:`, conv);
+            
+            const item = document.createElement('div');
+            item.className = 'conversation-item';
+            if (currentConversation && String(currentConversation.id) === String(conv.id)) {
+                item.classList.add('active');
+            }
+            
+            item.style.animationDelay = `${index * 0.05}s`;
+
+            item.innerHTML = `
+                <div class="conv-header">
+                    <div class="conv-name">${conv.name || 'Utilisateur'}</div>
+                    <div class="conv-time">${conv.time || ''}</div>
+                </div>
+                <div class="conv-preview">${conv.lastMessage || 'Pas de message'}</div>
+                ${conv.unread > 0 ? `<span class="unread-badge">${conv.unread} nouveau${conv.unread > 1 ? 'x' : ''}</span>` : ''}
+            `;
+
+            item.onclick = () => selectConversation(conv.id);
+            list.appendChild(item);
+        });
+        
+        console.log('Tous les items ont été ajoutés au DOM');
+        
+    } catch (error) {
+        console.error('Erreur lors du chargement des conversations:', error);
+        list.innerHTML = '<div style="padding: 24px; text-align: center; color: #999;">Erreur réseau</div>';
+    }
 }
 
 // SÉLECTIONNER UNE CONVERSATION
 async function selectConversation(id) {
-    try {
-        const userId = id;
+    const userId = id;
 
-        const response = await fetch('http://bot.fiacrekpanoutrade.com/user', {
+    try {
+        const response = await fetch('https://bot.fiacrekpanoutrade.com/user', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId })
         });
 
         if (!response.ok) {
-            console.error('Erreur API:', response.status);
-            alert('Erreur lors du chargement de la conversation');
+            console.error("Backend error:", response.status);
+            alert("Erreur API: " + response.status);
             return;
         }
 
-        const data = await response.json();
+        let data = await response.json();
+        console.log("API data brute:", data);
+        console.log("Type de data:", typeof data);
         
-        // Le backend peut retourner soit un tableau, soit un objet avec conversations
-        const conversationsList = Array.isArray(data) ? data : (data?.conversations ?? []);
-        
-        // Trouver la conversation (comparaison string pour éviter les problèmes de types)
+        // Si data est une string JSON, la parser
+        if (typeof data === 'string') {
+            data = JSON.parse(data);
+            console.log("Data après parsing:", data);
+        }
 
-        currentConversation = conversationsList.find(c => String(c.id) === String(id));
+        // ✅ L'API retourne un objet conversation directement, pas un tableau
+        // Si c'est déjà l'objet conversation avec id, name, messages
+        if (data && data.id && String(data.id) === String(id)) {
+            currentConversation = data;
+        } 
+        // Sinon si c'est un tableau
+        else if (Array.isArray(data)) {
+            currentConversation = data.find(c => String(c.id) === String(id));
+        }
+        // Sinon si c'est un objet avec une propriété conversations
+        else if (data && data.conversations && Array.isArray(data.conversations)) {
+            currentConversation = data.conversations.find(c => String(c.id) === String(id));
+        }
+        else {
+            currentConversation = null;
+        }
+        
+        console.log("currentConversation trouvée:", currentConversation);
         
         if (!currentConversation) {
-            console.error('Conversation non trouvée');
+            alert("Conversation non trouvée");
+            console.log("ID recherché:", id);
             return;
         }
 
-        // Adapter les messages
+        // ✅ Adapter le format des messages (TEXT → received)
         if (currentConversation.messages && Array.isArray(currentConversation.messages)) {
             currentConversation.messages = currentConversation.messages.map(msg => ({
                 ...msg,
@@ -199,10 +229,10 @@ async function selectConversation(id) {
 
         renderMessages();
         renderConversations();
-        
-    } catch (error) {
-        console.error('Erreur lors de la sélection de la conversation:', error);
-        alert('Erreur réseau');
+
+    } catch (e) {
+        console.log("Fetch failed:", e);
+        alert("Erreur réseau: impossible de joindre l'API");
     }
 }
 
@@ -219,8 +249,11 @@ function renderMessages() {
     container.innerHTML = '';
 
     if (!currentConversation || !currentConversation.messages) {
+        console.log("Pas de messages à afficher");
         return;
     }
+
+    console.log("Affichage de", currentConversation.messages.length, "messages");
 
     currentConversation.messages.forEach((msg, index) => {
         const messageDiv = document.createElement('div');
@@ -361,7 +394,7 @@ function downloadImage(event) {
 // FONCTIONS À INTÉGRER AVEC VOTRE BACKEND
 async function sendToTelegram(userId, text) {
     try {
-        const response = await fetch('http://bot.fiacrekpanoutrade.com/send-message', {
+        const response = await fetch('https://bot.fiacrekpanoutrade.com/send-message', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId, text })
@@ -381,14 +414,13 @@ async function sendImagesToTelegram(userId, images, caption) {
         formData.append('userId', userId);
         formData.append('caption', caption || '');
         
-        // Convertir les images base64 en blobs
         for (let i = 0; i < images.length; i++) {
             const response = await fetch(images[i]);
             const blob = await response.blob();
             formData.append(`image${i}`, blob, `image${i}.jpg`);
         }
         
-        const response = await fetch('http://bot.fiacrekpanoutrade.com/send-images', {
+        const response = await fetch('https://bot.fiacrekpanoutrade.com/send-images', {
             method: 'POST',
             body: formData
         });
@@ -405,7 +437,6 @@ async function sendImagesToTelegram(userId, images, caption) {
 function archiveChat() {
     if (currentConversation) {
         alert('Archive: ' + currentConversation.name);
-        // TODO: Implémenter l'archivage
     }
 }
 
@@ -413,7 +444,6 @@ function blockUser() {
     if (currentConversation) {
         if (confirm('Voulez-vous vraiment bloquer ' + currentConversation.name + ' ?')) {
             alert('Utilisateur bloqué');
-            // TODO: Implémenter le blocage
         }
     }
 }
@@ -468,7 +498,7 @@ function setupEventListeners() {
 
     // Actualiser les conversations toutes les 30 secondes
     setInterval(() => {
-        loadConversations();
+        renderConversations();
     }, 30000);
 }
 
@@ -488,4 +518,6 @@ function handleResize() {
 }
 
 // DÉMARRER L'APPLICATION
-init();
+document.addEventListener('DOMContentLoaded', function() {
+    init();
+});
