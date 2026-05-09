@@ -1,0 +1,234 @@
+
+.input {
+  width: 100%; padding: 7px 11px; font-size: 13px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 8px; color: #e4e4e7;
+  font-family: 'Geist', sans-serif;
+  outline: none; transition: border-color .15s;
+  box-sizing: border-box;
+}
+.input:focus { border-color: rgba(56,189,248,.4); }
+.input::placeholder { color: #3f3f46; }
+select.input { cursor: pointer; }
+textarea.input { resize: vertical; }
+
+/* ── btn-icon ── */
+.btn-icon {
+  width: 28px; height: 28px; display: flex; align-items: center;
+  justify-content: center; background: rgba(255,255,255,.04);
+  color: #52525b; border: 1px solid rgba(255,255,255,.07);
+  border-radius: 7px; cursor: pointer; transition: all .15s; flex-shrink: 0;
+}
+.btn-icon:hover { background: rgba(255,255,255,.08); color: #d4d4d8; }
+
+/* ── Format selector ── */
+.format-btn {
+  flex: 1; padding: 10px 8px; border-radius: 9px; cursor: pointer;
+  border: 1px solid rgba(255,255,255,.07);
+  background: rgba(255,255,255,.03);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  transition: all .15s; color: #52525b; font-size: 11px; text-align: center;
+}
+.format-btn:hover { border-color: rgba(255,255,255,.14); color: #a1a1aa; }
+.format-btn.active { border-color: rgba(56,189,248,.5); background: rgba(56,189,248,.07); color: #38bdf8; }
+.format-btn svg { width: 18px; height: 18px; }
+
+/* ── Variable chip ── */
+.var-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px; border-radius: 6px; font-size: 11px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  color: #a1a1aa; cursor: pointer; transition: all .15s;
+  font-family: 'Geist Mono', monospace;
+}
+.var-chip:hover { background: rgba(56,189,248,.08); border-color: rgba(56,189,248,.3); color: #38bdf8; }
+
+/* ── Filter tag ── */
+.filter-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 7px; font-size: 11px;
+  background: rgba(56,189,248,.08); border: 1px solid rgba(56,189,248,.2);
+  color: #38bdf8;
+}
+.filter-tag button {
+  width: 14px; height: 14px; display: flex; align-items: center;
+  justify-content: center; opacity: .6; cursor: pointer;
+  background: none; border: none; color: inherit; padding: 0;
+}
+.filter-tag button:hover { opacity: 1; }
+
+/* ── Stat bar ── */
+.stat-bar-track { height: 4px; background: rgba(255,255,255,.06); border-radius: 99px; overflow: hidden; }
+.stat-bar-fill  { height: 100%; border-radius: 99px; }
+
+/* ── Section label ── */
+.section-label { font-size: 11px; font-weight: 500; color: #52525b; margin-bottom: 10px; }
+
+/* ── Upload zone ── */
+.upload-zone {
+  border: 1px dashed rgba(255,255,255,.12); border-radius: 9px;
+  padding: 20px; text-align: center; cursor: pointer;
+  transition: all .15s; color: #52525b;
+}
+.upload-zone:hover { border-color: rgba(56,189,248,.35); color: #38bdf8; background: rgba(56,189,248,.04); }
+
+/* ── Toggle switch ── */
+.toggle {
+  width: 34px; height: 18px; background: rgba(255,255,255,.1);
+  border-radius: 99px; position: relative; cursor: pointer;
+  transition: background .2s; flex-shrink: 0; border: none; padding: 0;
+}
+.toggle.on { background: #38bdf8; }
+.toggle::after {
+  content: ''; position: absolute;
+  width: 12px; height: 12px; background: white;
+  border-radius: 50%; top: 3px; left: 3px; transition: transform .2s;
+}
+.toggle.on::after { transform: translateX(16px); }
+
+/* ── Telegram preview ── */
+.tg-preview { background: #1c2733; border-radius: 12px; overflow: hidden; }
+.tg-header  { background: #17212b; padding: 10px 14px; display: flex; align-items: center; gap: 10px; }
+.tg-body    { padding: 14px; display: flex; flex-direction: column; gap: 8px; min-height: 140px; }
+.tg-bubble  {
+  background: #1e3040; border-radius: 12px 12px 12px 2px;
+  padding: 9px 12px; font-size: 12px; line-height: 1.55;
+  color: #e2e8f0; max-width: 85%; width: fit-content;
+}
+.tg-time { font-size: 10px; color: #4a6478; margin-top: 2px; }
+
+/* ── Campaign row ── */
+.camp-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  cursor: pointer; transition: background .1s;
+}
+.camp-row:last-child { border-bottom: none; }
+.camp-row:hover { background: rgba(255,255,255,.02); }
+
+/* ── Campaign table columns ── */
+.camp-table-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 8px 16px;
+  background: rgba(255,255,255,.02);
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.camp-col-name { flex: 1; min-width: 0; font-size: 10px; font-weight: 500; color: #3f3f46; }
+.camp-col      { width: 70px; flex-shrink: 0; font-size: 10px; font-weight: 500; color: #3f3f46; }
+
+/* ── Modal ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.7);
+  z-index: 60; display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity .15s;
+  padding: 16px;
+}
+.modal-overlay.open { opacity: 1; pointer-events: auto; }
+.modal {
+  background: #111113; border: 1px solid rgba(255,255,255,.1);
+  border-radius: 14px; width: 480px; max-width: 100%;
+  transform: scale(.97); transition: transform .15s;
+  max-height: calc(100vh - 32px); overflow-y: auto;
+}
+.modal-overlay.open .modal { transform: scale(1); }
+
+/* ── Tabs ── */
+.tab {
+  padding: 5px 12px; font-size: 12px; border-radius: 7px;
+  cursor: pointer; transition: all .15s;
+  border: none; background: none; color: #52525b;
+  font-family: 'Geist', sans-serif;
+}
+.tab:hover { color: #a1a1aa; }
+.tab.active { background: rgba(255,255,255,.07); color: #fafafa; }
+
+/* ── msg-card padding ── */
+.msg-card { padding: 20px; }
+
+/* ════════════════════════════════════════════════════════════════
+   LAYOUT RESPONSIVE
+   ════════════════════════════════════════════════════════════════ */
+
+
+.camp-table-desktop { display: block; }
+.camp-cards-mobile  { display: none;  }
+/* Compose: 2 colonnes desktop, 1 colonne mobile */
+.compose-layout {
+  display: flex;
+  gap: 16px;
+  min-height: 0;
+}
+.compose-form    { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+.compose-sidebar { width: 280px; flex-shrink: 0; display: flex; flex-direction: column; gap: 14px; }
+
+/* Grille destinataires : 3 colonnes → 1 ligne compressée */
+.dest-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+
+/* Grille formats : 5 boutons → wrap */
+.format-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.format-grid .format-btn { flex: 1; min-width: 80px; }
+
+/* Options envoi : 2 colonnes */
+.options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* Historique stats : 4 → 2 */
+.history-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+/* Mobile preview : cachée sur desktop, visible sur mobile */
+.preview-mobile-only { display: none; }
+
+/* Topbar tabs : ne rétrécit pas */
+.topbar-tabs { display: flex; align-items: center; gap: 0.5; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); border-radius: 8px; padding: 2px; flex-shrink: 0; }
+
+/* ── Breakpoint large tablette ── */
+@media (max-width: 1100px) {
+  .compose-sidebar { width: 240px; }
+}
+
+/* ── Breakpoint tablette ── */
+@media (max-width: 900px) {
+  /* Sidebar devient drawer → main prend toute la largeur */
+  .compose-layout { flex-direction: column; }
+  .compose-sidebar { display: none; }        /* cachée → remplacée par preview inline */
+  .preview-mobile-only { display: block; }
+
+  .history-stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ── Breakpoint mobile ── */
+@media (max-width: 640px) {
+  .msg-card { padding: 14px; }
+
+  /* Format buttons : 3 par ligne max */
+  .format-grid .format-btn { min-width: 70px; font-size: 10px; }
+  .format-btn svg { width: 15px; height: 15px; }
+
+  /* Options grid → 1 colonne */
+  .options-grid { grid-template-columns: 1fr; }
+
+  /* Dest grid → 3 colonnes compressées */
+  .dest-grid .format-btn { font-size: 10px; padding: 8px 4px; }
+
+  /* Topbar actions → icônes seulement */
+  .topbar-btn-label { display: none; }
+
+  /* Table historique → cachée, remplacée par cards */
+  .camp-table-desktop { display: none; }
+  .camp-cards-mobile  { display: flex; }
+}
+
+/* ── Breakpoint mobile large ── */
+@media (min-width: 641px) {
+  .camp-table-desktop { display: block; }
+  .camp-cards-mobile  { display: none; }
+}
+
+/* ── Très petit écran ── */
+@media (max-width: 400px) {
+  .history-stats-grid { grid-template-columns: 1fr 1fr; }
+  .dest-grid { grid-template-columns: 1fr; }
+  .dest-grid .format-btn { flex-direction: row; justify-content: flex-start; padding: 8px 10px; }
+}

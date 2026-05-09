@@ -17,18 +17,25 @@ const emojis = [
     '🎊', '🎈', '🎁', '🏆', '🥇', '🥈', '🥉', '🎯', '💰', '💸'
 ];
 
+// CONFIGURATION
+const TELEGRAM_BOT_TOKEN = '7786438913:AAF9uLZpsBGzMk_Ty5tH3tqG4qjsLN8jWEo';
+const TELEGRAM_API = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`;
+
+// VARIABLES GLOBALES
 let conversations = [];
 let currentConversation = null;
 let pendingImages = [];
 
-// INITIALISATION
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//                         INITIALISATION
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 async function init() {
-    await renderConversations(); // Attendre le chargement des conversations
+    await renderConversations();
     setupEventListeners();
     initEmojiPicker();
 }
 
-// INITIALISER LE PICKER D'EMOJIS
 function initEmojiPicker() {
     const emojiGrid = document.getElementById('emojiGrid');
     emojis.forEach(emoji => {
@@ -40,7 +47,10 @@ function initEmojiPicker() {
     });
 }
 
-// TOGGLE EMOJI PICKER
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//                         GESTION EMOJI
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 function toggleEmojiPicker() {
     const emojiPicker = document.getElementById('emojiPicker');
     if (emojiPicker.style.display === 'none' || !emojiPicker.style.display) {
@@ -61,7 +71,6 @@ function closeEmojiPickerOnClickOutside(e) {
     }
 }
 
-// INSÉRER UN EMOJI
 function insertEmoji(emoji) {
     const input = document.getElementById('messageInput');
     const cursorPos = input.selectionStart;
@@ -72,10 +81,12 @@ function insertEmoji(emoji) {
     input.selectionStart = input.selectionEnd = cursorPos + emoji.length;
 }
 
-// AFFICHER LES CONVERSATIONS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//                    AFFICHAGE CONVERSATIONS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 async function renderConversations() {
     const list = document.getElementById('conversationsList');
-    console.log('Element conversationsList:', list); // Debug
     
     if (!list) {
         console.error('Element conversationsList non trouvé dans le DOM!');
@@ -85,15 +96,11 @@ async function renderConversations() {
     list.innerHTML = '';
 
     try {
-        console.log('Envoi de la requête à l\'API...');
-        
-        const response = await fetch('https://bot.fiacrekpanoutrade.com/process', {
+        const response = await fetch('http://54.226.165.244:8000/process', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ text: 'a' })
         });
-
-        console.log('Réponse reçue, status:', response.status);
 
         if (!response.ok) {
             console.error('Erreur API:', response.status);
@@ -102,11 +109,8 @@ async function renderConversations() {
         }
 
         const data = await response.json();
-        console.log('Données brutes reçues:', data);
-        console.log('Type de data:', typeof data);
-        console.log('Est-ce un tableau?', Array.isArray(data));
         
-        // Si data est une string JSON, la parser
+        // Parser si string JSON
         if (typeof data === 'string') {
             conversations = JSON.parse(data);
         } else if (Array.isArray(data)) {
@@ -114,9 +118,6 @@ async function renderConversations() {
         } else {
             conversations = [];
         }
-        
-        console.log('Conversations après parsing:', conversations);
-        console.log('Nombre de conversations:', conversations.length);
 
         if (conversations.length === 0) {
             list.innerHTML = '<div style="padding: 24px; text-align: center; color: #999;">Aucune conversation</div>';
@@ -124,8 +125,6 @@ async function renderConversations() {
         }
 
         conversations.forEach((conv, index) => {
-            console.log(`Création de l'item ${index}:`, conv);
-            
             const item = document.createElement('div');
             item.className = 'conversation-item';
             if (currentConversation && String(currentConversation.id) === String(conv.id)) {
@@ -147,15 +146,16 @@ async function renderConversations() {
             list.appendChild(item);
         });
         
-        console.log('Tous les items ont été ajoutés au DOM');
-        
     } catch (error) {
         console.error('Erreur lors du chargement des conversations:', error);
         list.innerHTML = '<div style="padding: 24px; text-align: center; color: #999;">Erreur réseau</div>';
     }
 }
 
-// SÉLECTIONNER UNE CONVERSATION
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//                   SÉLECTION CONVERSATION
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 async function selectConversation(id) {
     const userId = id;
 
@@ -173,25 +173,19 @@ async function selectConversation(id) {
         }
 
         let data = await response.json();
-        console.log("API data brute:", data);
-        console.log("Type de data:", typeof data);
         
-        // Si data est une string JSON, la parser
+        // Parser si string JSON
         if (typeof data === 'string') {
             data = JSON.parse(data);
-            console.log("Data après parsing:", data);
         }
 
-        // ✅ L'API retourne un objet conversation directement, pas un tableau
-        // Si c'est déjà l'objet conversation avec id, name, messages
+        // Trouver la conversation
         if (data && data.id && String(data.id) === String(id)) {
             currentConversation = data;
         } 
-        // Sinon si c'est un tableau
         else if (Array.isArray(data)) {
             currentConversation = data.find(c => String(c.id) === String(id));
         }
-        // Sinon si c'est un objet avec une propriété conversations
         else if (data && data.conversations && Array.isArray(data.conversations)) {
             currentConversation = data.conversations.find(c => String(c.id) === String(id));
         }
@@ -199,15 +193,12 @@ async function selectConversation(id) {
             currentConversation = null;
         }
         
-        console.log("currentConversation trouvée:", currentConversation);
-        
         if (!currentConversation) {
             alert("Conversation non trouvée");
-            console.log("ID recherché:", id);
             return;
         }
 
-        // ✅ Adapter le format des messages (TEXT → received)
+        // Adapter le format des messages (TEXT → received)
         if (currentConversation.messages && Array.isArray(currentConversation.messages)) {
             currentConversation.messages = currentConversation.messages.map(msg => ({
                 ...msg,
@@ -236,24 +227,23 @@ async function selectConversation(id) {
     }
 }
 
-// RETOUR AUX CONVERSATIONS (MOBILE)
 function goBackToConversations() {
     document.getElementById('sidebar').classList.remove('hidden');
     document.getElementById('chatArea').classList.add('hidden');
     currentConversation = null;
 }
 
-// AFFICHER LES MESSAGES
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//                      AFFICHAGE MESSAGES
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 function renderMessages() {
     const container = document.getElementById('messagesContainer');
     container.innerHTML = '';
 
     if (!currentConversation || !currentConversation.messages) {
-        console.log("Pas de messages à afficher");
         return;
     }
-
-    console.log("Affichage de", currentConversation.messages.length, "messages");
 
     currentConversation.messages.forEach((msg, index) => {
         const messageDiv = document.createElement('div');
@@ -266,8 +256,8 @@ function renderMessages() {
                 imagesHTML = `<img src="${msg.images[0]}" class="message-image" alt="Image" onclick="openLightbox('${msg.images[0]}')">`;
             } else {
                 imagesHTML = '<div class="message-images-grid">';
-                msg.images.forEach(img => {
-                    imagesHTML += `<img src="${img}" class="message-image" alt="Image" onclick="openLightbox('${img}')">`;
+                msg.images.forEach(imgUrl => {
+                    imagesHTML += `<img src="${imgUrl}" class="message-image" alt="Image" onclick="openLightbox('${imgUrl}')">`;
                 });
                 imagesHTML += '</div>';
             }
@@ -289,7 +279,10 @@ function renderMessages() {
     container.scrollTop = container.scrollHeight;
 }
 
-// ENVOYER UN MESSAGE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//                    ENVOI DE MESSAGES
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 async function sendMessage() {
     const input = document.getElementById('messageInput');
     const text = input.value.trim();
@@ -300,23 +293,47 @@ async function sendMessage() {
     const now = new Date();
     const time = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
 
+    let messageType = 'text';
+    let mediaUrls = [];
+    
+    // ÉTAPE 1 : Si images → Upload vers LARAVEL (stockage uniquement)
+    if (pendingImages.length > 0) {
+        try {
+            mediaUrls = await uploadToLaravel(pendingImages, 'image');
+            
+            if (text || caption) {
+                messageType = 'image_with_text';
+            } else {
+                messageType = 'image';
+            }
+        } catch (error) {
+            console.error('❌ Erreur stockage Laravel:', error);
+            alert('Erreur lors du stockage des images');
+            return;
+        }
+    } else if (text) {
+        if (isVideoUrl(text)) {
+            messageType = 'video_url';
+        } else {
+            messageType = 'text';
+        }
+    }
+
+    // Créer le message avec URLs
     const newMessage = {
         id: Date.now(),
-        text: text || caption,
+        text: text || caption || '',
         type: 'sent',
-        time: time
+        time: time,
+        messageType: messageType
     };
 
-    // Ajouter les images si présentes
-    if (pendingImages.length > 0) {
-        newMessage.images = [...pendingImages];
-        pendingImages = [];
-        document.getElementById('imagePreviewContainer').style.display = 'none';
-        document.getElementById('imageCaption').value = '';
+    if (mediaUrls.length > 0) {
+        newMessage.images = mediaUrls; // URLs Laravel
     }
 
     currentConversation.messages.push(newMessage);
-    currentConversation.lastMessage = text || '📷 Photo';
+    currentConversation.lastMessage = getMessagePreview(newMessage);
     currentConversation.time = time;
 
     input.value = '';
@@ -325,46 +342,212 @@ async function sendMessage() {
     renderMessages();
     renderConversations();
 
-    // Envoyer à Telegram
-    if (newMessage.images) {
-        await sendImagesToTelegram(currentConversation.userId, newMessage.images, newMessage.text);
-    } else {
-        await sendToTelegram(currentConversation.userId, text);
+    // ÉTAPE 2 : JavaScript envoie DIRECTEMENT au BOT Telegram
+    await sendDirectlyToTelegramBot(
+        currentConversation.userId,
+        text || caption,
+        mediaUrls,
+        messageType
+    );
+    
+    // Nettoyer
+    pendingImages = [];
+    document.getElementById('imagePreviewContainer').style.display = 'none';
+    document.getElementById('imageCaption').value = '';
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//                  UPLOAD VERS LARAVEL (stockage)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+async function uploadToLaravel(mediaFiles, mediaType = 'image') {
+    const uploadedUrls = [];
+    
+    for (let i = 0; i < mediaFiles.length; i++) {
+        const file = mediaFiles[i];
+        
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('type', mediaType);
+            formData.append('userId', currentConversation.userId);
+            
+            console.log(`📤 Stockage Laravel: ${file.name} (${file.size} bytes)`);
+            
+            const response = await fetch('https://fiacrekpanoutrade.com/media', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json'
+                },
+                body: formData
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`Stockage failed: ${errorData.message || response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.url) {
+                uploadedUrls.push(data.url);
+                console.log(`✅ Stocké:`, data.url);
+            } else {
+                throw new Error('URL non retournée par Laravel');
+            }
+            
+        } catch (error) {
+            console.error(`❌ Erreur stockage:`, error);
+            throw error;
+        }
+    }
+    
+    return uploadedUrls;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//              ENVOI DIRECT AU BOT TELEGRAM (JavaScript)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+async function sendDirectlyToTelegramBot(userId, text, mediaUrls = [], messageType = 'text') {
+    try {
+        console.log('📤 Envoi direct au bot Telegram...');
+        console.log('Type:', messageType);
+        console.log('URLs:', mediaUrls);
+        
+        if (messageType === 'text') {
+            // Texte simple
+            const response = await fetch(`${TELEGRAM_API}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: userId,
+                    text: text
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Telegram API error: ${response.status}`);
+            }
+            
+            console.log('✅ Message texte envoyé');
+        } 
+        
+        else if (messageType === 'image') {
+            // Image(s) seule(s)
+            for (const imageUrl of mediaUrls) {
+                const response = await fetch(`${TELEGRAM_API}/sendPhoto`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: userId,
+                        photo: imageUrl
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Telegram API error: ${response.status}`);
+                }
+            }
+            console.log(`✅ ${mediaUrls.length} image(s) envoyée(s)`);
+        }
+        
+        else if (messageType === 'image_with_text') {
+            // Première image avec légende
+            if (mediaUrls.length > 0) {
+                const response = await fetch(`${TELEGRAM_API}/sendPhoto`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: userId,
+                        photo: mediaUrls[0],
+                        caption: text
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Telegram API error: ${response.status}`);
+                }
+                
+                // Autres images sans légende
+                for (let i = 1; i < mediaUrls.length; i++) {
+                    const resp = await fetch(`${TELEGRAM_API}/sendPhoto`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            chat_id: userId,
+                            photo: mediaUrls[i]
+                        })
+                    });
+                    
+                    if (!resp.ok) {
+                        throw new Error(`Telegram API error: ${resp.status}`);
+                    }
+                }
+            }
+            console.log('✅ Image(s) avec texte envoyée(s)');
+        }
+        
+        else if (messageType === 'video_url') {
+            // URL vidéo
+            const response = await fetch(`${TELEGRAM_API}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: userId,
+                    text: text
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Telegram API error: ${response.status}`);
+            }
+            
+            console.log('✅ URL vidéo envoyée');
+        }
+        
+    } catch (error) {
+        console.error('❌ Erreur envoi Telegram:', error);
+        alert('Erreur lors de l\'envoi au bot Telegram');
     }
 }
 
-// GÉRER L'UPLOAD D'IMAGE(S)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//                      GESTION DES IMAGES
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 function handleImageUpload(event) {
     const files = event.target.files;
     if (!files || files.length === 0 || !currentConversation) return;
 
-    pendingImages = [];
+    // Stocker les File objects (pas base64)
+    pendingImages = Array.from(files);
+    
     const imagePreviewContainer = document.getElementById('imagePreviewContainer');
     const imagePreview = document.getElementById('imagePreview');
 
-    Array.from(files).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            pendingImages.push(e.target.result);
-            if (pendingImages.length === 1) {
-                imagePreview.src = e.target.result;
-                imagePreviewContainer.style.display = 'block';
-            }
-        };
-        reader.readAsDataURL(file);
-    });
+    // Preview de la première image
+    if (pendingImages.length > 0) {
+        const firstFile = pendingImages[0];
+        const previewUrl = URL.createObjectURL(firstFile);
+        imagePreview.src = previewUrl;
+        imagePreviewContainer.style.display = 'block';
+        imagePreview.onload = () => URL.revokeObjectURL(previewUrl);
+    }
 
     event.target.value = '';
 }
 
-// ANNULER L'UPLOAD D'IMAGE
 function cancelImageUpload() {
     pendingImages = [];
     document.getElementById('imagePreviewContainer').style.display = 'none';
     document.getElementById('imageCaption').value = '';
 }
 
-// LIGHTBOX POUR VISUALISER LES IMAGES
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//                        LIGHTBOX
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 function openLightbox(imageSrc) {
     const lightbox = document.getElementById('lightbox');
     const lightboxImage = document.getElementById('lightboxImage');
@@ -391,49 +574,40 @@ function downloadImage(event) {
     document.body.removeChild(link);
 }
 
-// FONCTIONS À INTÉGRER AVEC VOTRE BACKEND
-async function sendToTelegram(userId, text) {
-    try {
-        const response = await fetch('https://bot.fiacrekpanoutrade.com/send-message', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId, text })
-        });
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//                      FONCTIONS UTILITAIRES
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-        if (!response.ok) {
-            console.error('Erreur envoi message:', response.status);
-        }
-    } catch (error) {
-        console.error('Erreur lors de l\'envoi du message:', error);
+function isVideoUrl(text) {
+    const videoPatterns = [
+        /youtube\.com\/watch\?v=/i,
+        /youtu\.be\//i,
+        /vimeo\.com\//i,
+        /dailymotion\.com\//i,
+        /\.mp4$/i,
+        /\.avi$/i,
+        /\.mov$/i,
+        /\.webm$/i
+    ];
+    
+    return videoPatterns.some(pattern => pattern.test(text));
+}
+
+function getMessagePreview(message) {
+    switch (message.messageType) {
+        case 'image':
+            return '📷 Photo';
+        case 'image_with_text':
+            return `📷 ${message.text.substring(0, 30)}${message.text.length > 30 ? '...' : ''}`;
+        case 'video':
+        case 'video_url':
+            return '🎥 Vidéo';
+        case 'text':
+        default:
+            return message.text.substring(0, 50) + (message.text.length > 50 ? '...' : '');
     }
 }
 
-async function sendImagesToTelegram(userId, images, caption) {
-    try {
-        const formData = new FormData();
-        formData.append('userId', userId);
-        formData.append('caption', caption || '');
-        
-        for (let i = 0; i < images.length; i++) {
-            const response = await fetch(images[i]);
-            const blob = await response.blob();
-            formData.append(`image${i}`, blob, `image${i}.jpg`);
-        }
-        
-        const response = await fetch('https://bot.fiacrekpanoutrade.com/send-images', {
-            method: 'POST',
-            body: formData
-        });
-
-        if (!response.ok) {
-            console.error('Erreur envoi images:', response.status);
-        }
-    } catch (error) {
-        console.error('Erreur lors de l\'envoi des images:', error);
-    }
-}
-
-// AUTRES ACTIONS
 function archiveChat() {
     if (currentConversation) {
         alert('Archive: ' + currentConversation.name);
@@ -447,6 +621,10 @@ function blockUser() {
         }
     }
 }
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//                    EVENT LISTENERS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 function setupEventListeners() {
     // RECHERCHE
@@ -517,7 +695,10 @@ function handleResize() {
     }
 }
 
-// DÉMARRER L'APPLICATION
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//                      DÉMARRAGE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 document.addEventListener('DOMContentLoaded', function() {
     init();
 });

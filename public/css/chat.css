@@ -1,0 +1,376 @@
+/* ══════════════════════════════════════════════════════════════════════
+   chat-direct.css
+   Styles spécifiques à chat-direct.html
+   Les classes globales (nav-item, badge, btn-*, topbar, sidebar,
+   hamburger, input, pbar, pulse, modal-overlay, modal…)
+   viennent de dashboard.css — ne pas les redéfinir ici.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── Layout racine ─────────────────────────────────────────────────── */
+#chat-root {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    background: #0c0c0e;
+}
+
+/* ══ COL 1 : Liste conversations ══════════════════════════════════ */
+#conv-col {
+    width: 268px;
+    flex-shrink: 0;
+    border-right: 1px solid rgba(255,255,255,.05);
+    background: #0d0d0f;
+    display: flex;
+    flex-direction: column;
+    transition: transform .25s ease;
+    z-index: 10;
+}
+
+/* ══ COL 2 : Fil de messages ══════════════════════════════════════ */
+#messages-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+    background: #0c0c0e;
+}
+
+/* ══ COL 3 : Profil ══════════════════════════════════════════════ */
+#profile-col {
+    width: 240px;
+    flex-shrink: 0;
+    border-left: 1px solid rgba(255,255,255,.05);
+    background: #0d0d0f;
+    overflow-y: auto;
+    transition: transform .25s ease;
+}
+
+/* ── Avatars ───────────────────────────────────────────────────── */
+.av {
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+.av-sm      { width: 26px; height: 26px; font-size: 10px; }
+.av-default { background: rgba(255,255,255,.07); color: #71717a; }
+.av-green   { background: rgba(52,211,153,.15);  color: #34d399; }
+.av-sky     { background: rgba(56,189,248,.15);  color: #38bdf8; }
+.av-amber   { background: rgba(251,191,36,.15);  color: #fbbf24; }
+.av-violet  { background: rgba(167,139,250,.15); color: #a78bfa; }
+.av-teal    { background: rgba(45,212,191,.15);  color: #2dd4bf; }
+.av-red     { background: rgba(248,113,113,.15); color: #f87171; }
+
+/* ── Conv items ────────────────────────────────────────────────── */
+.conv-item {
+    padding: 11px 14px;
+    cursor: pointer;
+    transition: background .12s;
+    border-bottom: 1px solid rgba(255,255,255,.04);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    border-left: 2px solid transparent;
+}
+.conv-item:hover   { background: rgba(255,255,255,.03); }
+.conv-item.active  { background: rgba(56,189,248,.06); border-left-color: #38bdf8; }
+.conv-item.blocked { opacity: .55; }
+
+/* ── Tabs ───────────────────────────────────────────────────────── */
+.tab {
+    padding: 4px 10px;
+    font-size: 11px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all .15s;
+    border: none;
+    background: none;
+    color: #52525b;
+    font-family: 'Geist', sans-serif;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.tab:hover  { color: #a1a1aa; }
+.tab.active { background: rgba(255,255,255,.07); color: #fafafa; }
+
+/* ── Bulles ─────────────────────────────────────────────────────── */
+.msg-group { display: flex; flex-direction: column; gap: 2px; margin-bottom: 14px; }
+
+.bubble {
+    padding: 9px 13px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.6;
+    max-width: 72%;
+     min-width: 60px;  
+    width: fit-content;
+    word-break: break-word;
+}
+.bubble-in {
+    background: rgba(255,255,255,.06);
+    color: #d4d4d8;
+    border-bottom-left-radius: 3px;
+}
+.bubble-admin {
+    background: rgba(56,189,248,.18);
+    color: #bae6fd;
+    border-bottom-right-radius: 3px;
+}
+.bubble-ia {
+    background: rgba(45,212,191,.1);
+    color: #5eead4;
+    border-bottom-left-radius: 3px;
+    border: 1px solid rgba(45,212,191,.15);
+}
+.bubble-broadcast {
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 10px;
+    max-width: 85%;
+    width: 100%;
+    padding: 0;
+    overflow: hidden;
+}
+.bubble-form {
+    background: rgba(167,139,250,.06);
+    border: 1px dashed rgba(167,139,250,.2);
+    border-radius: 10px;
+    max-width: 80%;
+    padding: 10px 14px;
+}
+
+/* ── Broadcast card ─────────────────────────────────────────────── */
+.bc-header { padding: 9px 13px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,.06); }
+.bc-body   { padding: 9px 13px; font-size: 12px; color: #a1a1aa; line-height: 1.55; }
+.bc-footer { padding: 7px 13px; display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,.02); }
+
+/* ── Séparateur date ────────────────────────────────────────────── */
+.date-sep { display: flex; align-items: center; gap: 10px; margin: 16px 0 10px; }
+.date-sep span { font-size: 10px; color: #3f3f46; white-space: nowrap; }
+.date-sep::before,
+.date-sep::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.05); }
+
+/* ── Media ──────────────────────────────────────────────────────── */
+.media-thumb { border-radius: 8px; overflow: hidden; max-width: 220px; background: rgba(255,255,255,.05); }
+.media-doc   { display: flex; align-items: center; gap: 9px; padding: 9px 12px; background: rgba(255,255,255,.05); border-radius: 9px; font-size: 12px; color: #a1a1aa; }
+
+/* ── Reply quote ────────────────────────────────────────────────── */
+.reply-quote {
+    font-size: 11px;
+    padding: 5px 10px;
+    border-left: 2px solid rgba(56,189,248,.5);
+    background: rgba(56,189,248,.06);
+    border-radius: 0 6px 6px 0;
+    color: #71717a;
+    line-height: 1.4;
+}
+
+/* ── Méta messages ──────────────────────────────────────────────── */
+.msg-meta   { font-size: 10px; color: #3f3f46; margin-top: 3px; display: flex; align-items: center; gap: 5px; }
+.status-read  { color: #38bdf8; }
+.status-sent  { color: #52525b; }
+.status-error { color: #f87171; }
+
+/* ── AI chip ────────────────────────────────────────────────────── */
+.ai-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 99px;
+    background: rgba(45,212,191,.12);
+    color: #2dd4bf;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+/* ── Reply btn hover ────────────────────────────────────────────── */
+.msg-row { position: relative; }
+.msg-row:hover .reply-btn { opacity: 1; }
+.reply-btn { opacity: 0; transition: opacity .15s; }
+
+/* ── Zone saisie ────────────────────────────────────────────────── */
+.compose-area {
+    background: #0d0d0f;
+    border-top: 1px solid rgba(255,255,255,.06);
+    padding: 12px 14px;
+    flex-shrink: 0;
+}
+.compose-input {
+    width: 100%;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-size: 13px;
+    color: #e4e4e7;
+    font-family: 'Geist', sans-serif;
+    resize: none;
+    outline: none;
+    transition: border-color .15s;
+    min-height: 42px;
+    max-height: 120px;
+    line-height: 1.55;
+}
+.compose-input:focus        { border-color: rgba(56,189,248,.35); }
+.compose-input::placeholder { color: #3f3f46; }
+
+/* ── Bannières ──────────────────────────────────────────────────── */
+.blocked-banner {
+    display: flex; align-items: center; gap: 9px;
+    padding: 9px 14px;
+    background: rgba(248,113,113,.07);
+    border-bottom: 1px solid rgba(248,113,113,.15);
+    font-size: 12px; color: #fca5a5; flex-shrink: 0;
+}
+.ia-banner {
+    display: flex; align-items: center; gap: 9px;
+    padding: 7px 14px;
+    background: rgba(45,212,191,.06);
+    border-bottom: 1px solid rgba(45,212,191,.12);
+    font-size: 11px; color: #5eead4; flex-shrink: 0;
+}
+
+/* ── Toggle IA ──────────────────────────────────────────────────── */
+.toggle {
+    width: 30px; height: 16px;
+    background: rgba(255,255,255,.1);
+    border-radius: 99px;
+    position: relative;
+    cursor: pointer;
+    transition: background .2s;
+    flex-shrink: 0;
+    border: none; padding: 0;
+}
+.toggle.on { background: #2dd4bf; }
+.toggle::after {
+    content: '';
+    position: absolute;
+    width: 11px; height: 11px;
+    background: white;
+    border-radius: 50%;
+    top: 2.5px; left: 2.5px;
+    transition: transform .2s;
+}
+.toggle.on::after { transform: translateX(14px); }
+
+/* ── Profil panel ───────────────────────────────────────────────── */
+.profile-section { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,.05); }
+.profile-section:last-child { border-bottom: none; }
+.profile-label {
+    display: block;
+    font-size: 10px; font-weight: 500; color: #3f3f46;
+    letter-spacing: .05em; text-transform: uppercase;
+    margin-bottom: 10px;
+}
+.stat-row   { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+.stat-label { font-size: 11px; color: #52525b; }
+.stat-val   { font-size: 11px; font-weight: 500; color: #d4d4d8; }
+.pbar       { height: 3px; background: rgba(255,255,255,.06); border-radius: 99px; overflow: hidden; }
+.pbar-fill  { height: 100%; border-radius: 99px; }
+
+/* ── Overlay profil ─────────────────────────────────────────────── */
+#profile-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.6);
+    z-index: 35;
+}
+#profile-overlay.open { display: block; }
+
+/* ── Boutons back / profil (mobile) ─────────────────────────────── */
+#btn-back-conv,
+#btn-show-profile {
+    display: none;
+    width: 32px; height: 32px;
+    align-items: center; justify-content: center;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 8px;
+    color: #a1a1aa;
+    cursor: pointer;
+    transition: all .15s;
+    flex-shrink: 0;
+}
+#btn-back-conv:hover,
+#btn-show-profile:hover { background: rgba(255,255,255,.09); color: #e4e4e7; }
+
+/* ── Drag handle bottom sheet ────────────────────────────────────── */
+.profile-handle-mobile { display: none; }
+
+/* ── Animations ──────────────────────────────────────────────────── */
+@keyframes fadein {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.fadein { animation: fadein .18s ease; }
+
+/* ════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── Tablet ≤ 1024px : profil = drawer latéral ───────────────────── */
+@media (max-width: 1024px) {
+    #profile-col {
+        position: fixed;
+        top: 0; right: 0;
+        height: 100vh;
+        z-index: 36;
+        transform: translateX(100%);
+        box-shadow: -8px 0 32px rgba(0,0,0,.5);
+    }
+    #profile-col.open { transform: translateX(0); }
+    #btn-show-profile { display: flex; }
+}
+
+/* ── Mobile ≤ 700px : stack liste → messages ─────────────────────── */
+@media (max-width: 700px) {
+    #conv-col {
+        position: absolute;
+        inset: 0; width: 100%;
+        transition: transform .25s ease;
+    }
+    #conv-col.hidden-mobile {
+        transform: translateX(-100%);
+        pointer-events: none;
+    }
+    #messages-col {
+        position: absolute;
+        inset: 0; z-index: 11;
+        transform: translateX(100%);
+        transition: transform .25s ease;
+    }
+    #messages-col.visible { transform: translateX(0); }
+
+    #btn-back-conv { display: flex; }
+
+    .bubble { max-width: 88%; }
+
+    /* Profil = bottom sheet */
+    #profile-col {
+        top: auto; bottom: 0;
+        left: 0; right: 0;
+        width: 100%; height: 75vh;
+        border-radius: 16px 16px 0 0;
+        transform: translateY(100%);
+        box-shadow: 0 -8px 40px rgba(0,0,0,.6);
+    }
+    #profile-col.open { transform: translateY(0); }
+    .profile-handle-mobile { display: flex; }
+
+    .compose-area   { padding: 10px; }
+    #send-label     { display: none; }
+    #compose-footer { display: none; }
+}
+
+/* ── Très petit ≤ 480px ──────────────────────────────────────────── */
+@media (max-width: 480px) {
+    .hidden-xs    { display: none !important; }
+    .topbar-label { display: none; }
+    .tab          { padding: 4px 6px; font-size: 10px; }
+}
