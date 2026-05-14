@@ -4,18 +4,9 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\UserMediaController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\StatsController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\FormController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ChatController;
-use App\Http\Controllers\AiController;
-use App\Http\Controllers\JournalController;
-use App\Http\Controllers\TestimonialController;
-use App\Http\Controllers\SubscriptionController;
-use App\Http\Controllers\AppointmentController;
-use App\Http\Controllers\TrackingLinkController;
-use App\Http\Controllers\NotificationController;
+
 use App\Http\Controllers\CategoriesController;
 
 Route::get('/dashboard1', function () {

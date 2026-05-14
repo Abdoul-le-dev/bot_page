@@ -45,7 +45,7 @@
   <nav style="flex:1;padding:10px 8px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;">
 
     <div class="nav-section">Vue d'ensemble</div>
-    <button class="nav-item" data-nav="dashboard">
+    <button class="nav-item" data-nav="dashboard" href="/">
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
       Dashboard
     </button>

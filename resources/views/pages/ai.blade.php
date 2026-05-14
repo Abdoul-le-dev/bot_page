@@ -88,7 +88,7 @@ textarea.input{resize:vertical;font-family:'Geist Mono',monospace;font-size:12px
       <div style="width:30px;height:30px;background:#0ea5e9;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
         <svg width="15" height="15" fill="white" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19l-2.02 9.52c-.14.66-.54.82-1.09.51l-3-2.21-1.45 1.39c-.16.16-.3.3-.61.3l.22-3.1 5.6-5.06c.24-.22-.06-.34-.38-.12L7.03 14.5 4.06 13.6c-.65-.2-.66-.65.14-.96l11.65-4.5c.54-.2 1.01.13.09 2.05z"/></svg>
       </div>
-      <div><p class="text-sm font-medium text-white leading-none">TradingBot</p><p class="text-xs mt-0.5" style="color:#3f3f46;">3 247 membres</p></div>
+      <div><p class="text-sm font-medium text-white leading-none">Felipe Bot</p><p class="text-xs mt-0.5" style="color:#3f3f46;">3 247 membres</p></div>
     </div>
   </div>
   <nav class="flex-1 px-2 py-3 overflow-y-auto flex flex-col gap-0.5">
