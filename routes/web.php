@@ -9,7 +9,7 @@ use App\Http\Controllers\ChatController;
 
 use App\Http\Controllers\CategoriesController;
 
-Route::get('/dashboard1', function () {
+Route::get('/dashboard', function () {
     return view('dashboard');
 });
 
@@ -24,16 +24,19 @@ Route::get('/trade', function () {
 Route::get('/tache', function () {
     return view('pages.link_automat');
 });
+Route::get('/test', function () {
+    return view('pages.text');
+});
 Route::get('/ai', function () {
     return view('pages.ai');
 });
 
-Route::get('/dashboard',[DashboardController::class, 'index'])->name('dashboard');
-Route::get('/message',[MessageController::class, 'index'])->name('messages');
+
+
 Route::get('/categorie',[CategoriesController::class, 'index'])->name('categories');
 Route::get('/chat',[ChatController::class, 'index'])->name('chat');
 
-Route::post('/media',[UserMediaController::class, 'upload' ]);
+
 
 // Route::middleware(['auth'])->group(function () {
  

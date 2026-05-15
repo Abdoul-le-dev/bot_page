@@ -160,29 +160,14 @@ textarea.input{resize:vertical;}
 
 <!-- ─── SIDEBAR Journal─────────────────────────────────────────────────── -->
 <aside style="width:208px;flex-shrink:0;background:#0d0d0f;border-right:1px solid rgba(255,255,255,.05);" class="flex flex-col h-full">
-  <div class="px-4 py-4" style="border-bottom:1px solid rgba(255,255,255,.05);">
-    <div class="flex items-center gap-3">
-      <div style="width:30px;height:30px;background:#0ea5e9;border-radius:8px;" class="flex items-center justify-center flex-shrink-0">
-        <svg width="15" height="15" fill="white" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19l-2.02 9.52c-.14.66-.54.82-1.09.51l-3-2.21-1.45 1.39c-.16.16-.3.3-.61.3l.22-3.1 5.6-5.06c.24-.22-.06-.34-.38-.12L7.03 14.5 4.06 13.6c-.65-.2-.66-.65.14-.96l11.65-4.5c.54-.2 1.01.13.09 2.05z"/></svg>
-      </div>
-      <div><p class="text-sm font-medium text-white leading-none">TradingBot</p><p class="text-xs mt-0.5" style="color:#3f3f46;" id="sb-members">— membres</p></div>
-    </div>
-  </div>
+  
   <nav class="flex-1 px-2 py-3 overflow-y-auto flex flex-col gap-0.5">
-    <div class="nav-section">Vue d'ensemble</div>
-    <button class="nav-item"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Dashboard</button>
-    <button class="nav-item"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path d="M3 3v18h18"/><path d="m7 16 4-4 4 4 4-6"/></svg>Statistiques</button>
     <div class="nav-section" style="margin-top:6px;">Trading</div>
     <button class="nav-item active" id="nav-journal" onclick="showMainView('journal',this)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Journal</button>
     <button class="nav-item" id="nav-paires" onclick="showMainView('paires',this)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path d="M3 3v18h18"/><line x1="7" y1="17" x2="7" y2="9"/><line x1="12" y1="17" x2="12" y2="5"/><line x1="17" y1="17" x2="17" y2="12"/></svg>Paires & Pip</button>
     <button class="nav-item" id="nav-formules" onclick="showMainView('formules',this)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>Formulaires & Collecte</button>
   </nav>
-  <div class="px-4 py-3" style="border-top:1px solid rgba(255,255,255,.05);">
-    <div class="flex items-center gap-2.5">
-      <div style="width:27px;height:27px;border-radius:50%;background:linear-gradient(135deg,#0ea5e9,#6366f1);flex-shrink:0;"></div>
-      <div class="flex-1 min-w-0"><p class="text-xs font-medium text-zinc-300 truncate">Admin</p><p class="text-[10px]" style="color:#3f3f46;">admin@tradingbot.io</p></div>
-    </div>
-  </div>
+  
 </aside>
 
 <div class="flex-1 flex flex-col min-w-0 overflow-hidden" id="main-area">

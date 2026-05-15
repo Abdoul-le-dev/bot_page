@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\Facade;
+
 return [
 
     /*
@@ -104,6 +106,9 @@ return [
             explode(',', (string) env('APP_PREVIOUS_KEYS', ''))
         ),
     ],
+    'aliases' => Facade::defaultAliases()->merge([
+    'SB' => App\Helpers\SB::class,  // ← ajoute
+    ])->toArray(),
 
     /*
     |--------------------------------------------------------------------------
