@@ -2,9 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-use App\Http\Controllers\UserMediaController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\MessageController;
+
 use App\Http\Controllers\ChatController;
 
 use App\Http\Controllers\CategoriesController;
