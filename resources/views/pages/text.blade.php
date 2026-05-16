@@ -315,7 +315,7 @@ textarea.input{resize:vertical;font-family:'Geist Mono',monospace;font-size:12px
 
 @section('scripts')
 <script>
-const API = 'http://54.226.165.244:8000/ia-config'
+const API = 'https://fdkvip.com/ia-config'
 
 let currentView   = 'prompts'
 let tablesData    = null

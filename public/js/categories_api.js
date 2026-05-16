@@ -3,7 +3,7 @@
    Base URL : http://54.226.165.244:8000
    ═══════════════════════════════════════════════════════════════ */
 
-const API_URL = 'http://54.226.165.244:8000'
+const API_URL = 'https://fdkvip.com'
 
 // ── Helper fetch ─────────────────────────────────────────────
 async function apiFetch(path, options = {}) {

@@ -5,7 +5,7 @@
    Aucune logique UI ici — uniquement les fetch vers FastAPI.
    ══════════════════════════════════════════════════════════════════════ */
 
-const API_BASE = 'http://54.226.165.244:8000/forms'
+const API_BASE = 'https://fdkvip.com/forms'
 
 async function _request(method, path, body = null, isFormData = false) {
   const opts = {

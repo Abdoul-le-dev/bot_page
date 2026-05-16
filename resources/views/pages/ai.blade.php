@@ -356,7 +356,7 @@ textarea.input{resize:vertical;font-family:'Geist Mono',monospace;font-size:12px
 </div>
 
 <script>
-const API = 'http://54.226.165.244:8000/ia-config'
+const API = 'https://fdkvip.com/ia-config'
 
 // ── State ──────────────────────────────────────────────────
 let currentView = 'prompts'

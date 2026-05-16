@@ -1,8 +1,8 @@
 // ══════════════════════════════════════════════════════════════
 // CONFIGURATION API
 // ══════════════════════════════════════════════════════════════
-const API = 'http://54.226.165.244:8000/trading'
-const API_URL = window.API_URL || 'http://54.226.165.244:8000'
+const API = 'https://fdkvip.com/trading'
+const API_URL = window.API_URL || 'https://fdkvip.com'
 let _uploadedMediaUrl = null
 
 function getUploadedMediaUrl()    { return _uploadedMediaUrl }

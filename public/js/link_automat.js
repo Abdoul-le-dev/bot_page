@@ -1,8 +1,8 @@
 // ══════════════════════════════════════════════════════════════
 // CONFIG API
 // ══════════════════════════════════════════════════════════════
-const API_G = 'http://54.226.165.244:8000/growth'
-const API_B = 'http://54.226.165.244:8000'
+const API_G = 'https://fdkvip.com/growth'
+const API_B = 'https://fdkvip.com'
 
 async function apiFetch(url, opts = {}) {
   const res = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts })

@@ -3,7 +3,7 @@
    Dépend de messages.js pour : getUploadedMediaUrl(), updateSummary()
    ═══════════════════════════════════════════════════════════════ */
 
-const API_URL = window.API_URL || 'http://54.226.165.244:8000'
+const API_URL = window.API_URL || 'https://fdkvip.com'
 
 // ── Chargement des catégories ─────────────────────────────────────
 async function loadCategories() {

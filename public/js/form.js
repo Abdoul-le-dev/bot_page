@@ -621,7 +621,7 @@ function _renderAnswers(container, answers, user) {
 
   container.innerHTML = html
 }
-const MEDIA_BASE = 'http://54.226.165.244:8000'
+const MEDIA_BASE = 'https://fdkvip.com'
 function _mediaUrl(value) {
   if (!value) return ''
   if (value.startsWith('http')) return value
