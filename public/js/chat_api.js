@@ -11,6 +11,36 @@ async function _request(method, path, body = null, isFormData = false) {
     headers: isFormData ? {} : { 'Content-Type': 'application/json' },
   }
   if (body) opts.body = isFormData ? body : JSON.stringify(body)
+  
+  try {
+    const res = await fetch(`${API_BASE}${path}`, opts)
+    
+    // ✅ On lit le body UNE seule fois
+    const data = await res.json().catch(() => null)
+    
+    if (!res.ok) {
+      // ✅ Log complet de l'erreur serveur
+      console.error(`[chat_api] ${method} ${path} — ${res.status}:`, data)
+      throw new Error(
+        typeof data?.detail === 'string'
+          ? data.detail
+          : JSON.stringify(data?.detail) || 'Erreur API'
+      )
+    }
+    
+    return data
+  } catch (err) {
+    console.error(`[chat_api] ${method} ${path}`, err.message)
+    throw err
+  }
+}
+
+async function _requests(method, path, body = null, isFormData = false) {
+  const opts = {
+    method,
+    headers: isFormData ? {} : { 'Content-Type': 'application/json' },
+  }
+  if (body) opts.body = isFormData ? body : JSON.stringify(body)
   try {
     const res  = await fetch(`${API_BASE}${path}`, opts)
     const data = await res.json()

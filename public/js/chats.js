@@ -577,7 +577,11 @@ function closeProfilePanel() {
 }
 
 // ── Modal abonnement ──────────────────────────────────────────────────
-
+// ══════════════════════════════════════════════════════════════
+// DRAWERS & MODALS
+// ══════════════════════════════════════════════════════════════
+function openModal(id)  { document.getElementById(id)?.classList.add('open') }
+function closeModal(id) { document.getElementById(id)?.classList.remove('open') }  
 function openSubscriptionModal() {
   openModal('modal-subscription')
 }

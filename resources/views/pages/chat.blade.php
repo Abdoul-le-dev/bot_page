@@ -273,8 +273,8 @@
 <!-- ═══════════════════════════════════════════════════════════
      SCRIPTS
      ═══════════════════════════════════════════════════════════ -->
-<script src="../js/dashboard.js"></script>
-<script type="module" src="../js/chats.js"></script>
+<script src="../js/dashboard.js" defer></script>
+<script type="module" src="../js/chats.js" defer></script>
 
 </body>
 </html>

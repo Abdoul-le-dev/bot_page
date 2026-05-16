@@ -6,28 +6,44 @@ tailwind.config = {
   }
 }
 
-// Date courante
-  const d = new Date()
-  const opts = { weekday:'short', day:'numeric', month:'long', year:'numeric' }
-  document.getElementById('current-date').textContent = d.toLocaleDateString('fr-FR', opts)
+document.addEventListener('DOMContentLoaded', () => {
+
+  // Date courante
+  const dateEl = document.getElementById('current-date')
+  if (dateEl) {
+    const d = new Date()
+    const opts = { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' }
+    dateEl.textContent = d.toLocaleDateString('fr-FR', opts)
+  }
 
   // Notifications dropdown
-  const bell  = document.getElementById('bell-btn')
-  const panel = document.getElementById('notif-panel')
-  const clear = document.getElementById('notif-clear')
+  const bell    = document.getElementById('bell-btn')
+  const panel   = document.getElementById('notif-panel')
+  const clear   = document.getElementById('notif-clear')
+  const wrapper = document.getElementById('notif-wrapper')
 
-  bell.addEventListener('click', e => {
-    e.stopPropagation()
-    panel.style.display = panel.style.display === 'none' ? 'block' : 'none'
-  })
-  document.addEventListener('click', e => {
-    if (!document.getElementById('notif-wrapper').contains(e.target))
+  if (bell && panel) {
+    bell.addEventListener('click', e => {
+      e.stopPropagation()
+      panel.style.display = panel.style.display === 'none' ? 'block' : 'none'
+    })
+  }
+
+  if (wrapper && panel) {
+    document.addEventListener('click', e => {
+      if (!wrapper.contains(e.target)) {
+        panel.style.display = 'none'
+      }
+    })
+  }
+
+  if (clear && panel && bell) {
+    clear.addEventListener('click', () => {
       panel.style.display = 'none'
-  })
-  clear.addEventListener('click', () => {
-    panel.style.display = 'none'
-    bell.querySelector('span').style.display = 'none'
-  })
+      const badge = bell.querySelector('span')
+      if (badge) badge.style.display = 'none'
+    })
+  }
 
   // Sidebar drawer (mobile)
   const hamburger = document.getElementById('hamburger')
@@ -35,18 +51,27 @@ tailwind.config = {
   const overlay   = document.getElementById('sidebar-overlay')
 
   function openSidebar() {
-    sidebar.classList.add('open')
-    overlay.classList.add('open')
+    if (sidebar) sidebar.classList.add('open')
+    if (overlay) overlay.classList.add('open')
     document.body.style.overflow = 'hidden'
   }
+
   function closeSidebar() {
-    sidebar.classList.remove('open')
-    overlay.classList.remove('open')
+    if (sidebar) sidebar.classList.remove('open')
+    if (overlay) overlay.classList.remove('open')
     document.body.style.overflow = ''
   }
 
-  hamburger.addEventListener('click', e => { e.stopPropagation(); openSidebar() })
-  overlay.addEventListener('click', closeSidebar)
+  if (hamburger) {
+    hamburger.addEventListener('click', e => {
+      e.stopPropagation()
+      openSidebar()
+    })
+  }
+
+  if (overlay) {
+    overlay.addEventListener('click', closeSidebar)
+  }
 
   // Close sidebar when a nav item is clicked on mobile
   document.querySelectorAll('.nav-item').forEach(btn => {
@@ -54,3 +79,5 @@ tailwind.config = {
       if (window.innerWidth <= 900) closeSidebar()
     })
   })
+
+})
