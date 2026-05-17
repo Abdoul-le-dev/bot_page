@@ -49,7 +49,7 @@
     <div class="nav-section" style="margin-top:6px;">Messagerie</div>
 
     {{-- Messages ciblés (pas de route encore) --}}
-    <a href="#" class="nav-item">
+    <a href="{{ url('/message') }}" class="nav-item">
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path d="m22 2-7 20-4-9-9-4 20-7z"/></svg>
       Messages ciblés
     </a>
