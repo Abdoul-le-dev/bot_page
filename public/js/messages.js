@@ -231,7 +231,7 @@ async function _handleFileSelected(file) {
  * Retourne l'URL locale du fichier stocké.
  */
 async function _uploadToServer(file) {
-  const API_URL = window.API_URL || 'http://54.226.165.244:8000'
+  const API_URL = window.API_URL || 'https://fdkvip.com'
 
   // user_id admin = 0 pour les broadcasts (le fichier n'est pas lié à un user)
   const form = new FormData()

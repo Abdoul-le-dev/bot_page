@@ -81,7 +81,7 @@ export const apiGetFormStats = (formId) =>
  * Utilisé par : loadResponsesForForm(formId) → vue Réponses
  * Retourne : [ { telegram_id, prenom, score_final, score_max, pct, submitted_at } ]
  */
-export const apiGetResponses = (formId, limit = 100) =>
+export const apiGetResponses = (formId, limit = 10000) =>
   _request('GET', `/${formId}/responses?limit=${limit}`)
 
 /**
