@@ -54,7 +54,7 @@ async function _requests(method, path, body = null, isFormData = false) {
 
 // ── Conversations ────────────────────────────────────────────────────
 
-export const apiGetConversations = (tab = 'all', search = '', limit = 50, offset = 0) =>
+export const apiGetConversations = (tab = 'all', search = '', limit = 500, offset = 0) =>
   _request('GET', `/conversations?tab=${tab}&search=${encodeURIComponent(search)}&limit=${limit}&offset=${offset}`)
 
 export const apiGetConversation = (userId) =>
@@ -83,7 +83,7 @@ export const apiSetBlocked = (userId, blocked) =>
 
 // ── Messages ─────────────────────────────────────────────────────────
 
-export const apiGetMessages = (userId, limit = 50, beforeId = null, afterId = null) => {
+export const apiGetMessages = (userId, limit = 200, beforeId = null, afterId = null) => {
   let qs = `?limit=${limit}`
   if (beforeId) qs += `&before_id=${beforeId}`
   if (afterId)  qs += `&after_id=${afterId}`
