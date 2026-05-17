@@ -29,6 +29,10 @@ Route::get('/ai', function () {
     return view('pages.ai');
 });
 
+Route::get('/message', function () {
+    return view('pages.message');
+});
+
 
 
 Route::get('/categorie',[CategoriesController::class, 'index'])->name('categories');
