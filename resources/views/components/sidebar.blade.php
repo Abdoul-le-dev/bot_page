@@ -153,23 +153,7 @@
 </aside>
 <!-- ═══════════════ FIN SIDEBAR ═══════════════ -->
 
-<!-- Main wrapper -->
-<div id="main-content">
 
-  <!-- Topbar mobile (hamburger) -->
-  <div id="topbar-mobile">
-    <button onclick="SB.open()" aria-label="Menu">
-      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-    </button>
-    <span style="font-size:14px;font-weight:500;color:#e4e4e7;">@yield('page-title', 'Dashboard')</span>
-  </div>
-
-  <!-- Contenu de chaque page -->
-  <div style="flex:1;overflow:auto;">
-    @yield('content')
-  </div>
-
-</div>
 
 <!-- ═══════════════ JS SIDEBAR GLOBAL ═══════════════ -->
 <script>
