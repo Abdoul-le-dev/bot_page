@@ -495,7 +495,7 @@ textarea.input { resize: vertical; min-height: 60px; }
     </div>
     <div class="flex items-center justify-end gap-2 px-5 py-4 flex-shrink-0" style="border-top:1px solid rgba(255,255,255,0.06);">
       <button class="btn-ghost" onclick="closeModal('modal-gold-publish')">Annuler</button>
-      <button class="btn-gold" onclick="publishGoldSession()">
+      <button class="btn-gold" id="btn-publish" onclick="publishGoldSession()">
         <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="m22 2-7 20-4-9-9-4 20-7z"/></svg>
         Publier →
       </button>
