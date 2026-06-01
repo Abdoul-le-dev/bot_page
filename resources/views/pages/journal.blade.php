@@ -462,7 +462,7 @@ textarea.input { resize: vertical; min-height: 60px; }
           <p class="text-xs" style="color:#71717a;">Glisser ou <span style="color:#f59e0b;cursor:pointer;">parcourir</span></p>
         </div>
       </div>
-      <!-- Calculs temps réel -->
+      <!-- Calculs temps réel — CORRECTION v3 : formule brute abs(entry-sl) -->
       <div style="background:rgba(245,158,11,0.04);border:1px solid rgba(245,158,11,0.15);border-radius:10px;padding:14px;">
         <div class="flex items-center justify-between mb-3">
           <p class="text-xs font-medium" style="color:#f59e0b;">Calculs par niveau de compte</p>
@@ -472,17 +472,17 @@ textarea.input { resize: vertical; min-height: 60px; }
             <span>R:R: <span class="mono" style="color:#38bdf8;" id="gold-rr">—</span></span>
           </div>
         </div>
-        <div class="grid grid-cols-3 gap-2" id="gold-calcs-grid">
+        <div class="grid grid-cols-3 gap-2">
           <div style="background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:8px;padding:10px;text-align:center;">
-            <p class="text-xs mb-1" style="color:#f59e0b;">TP1 — &lt;500$</p>
+            <p class="text-xs mb-1" style="color:#f59e0b;">Fixe — &lt;250$</p>
             <p class="text-xs mono" id="gold-calc-tp1" style="color:#52525b;">—</p>
           </div>
           <div style="background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:8px;padding:10px;text-align:center;">
-            <p class="text-xs mb-1" style="color:#f59e0b;">TP1+2 — 500-2k$</p>
+            <p class="text-xs mb-1" style="color:#f59e0b;">Calculé — 500$</p>
             <p class="text-xs mono" id="gold-calc-tp2" style="color:#52525b;">—</p>
           </div>
           <div style="background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:8px;padding:10px;text-align:center;">
-            <p class="text-xs mb-1" style="color:#a78bfa;">TP1+2+3 — &gt;2k$</p>
+            <p class="text-xs mb-1" style="color:#a78bfa;">Calculé — 2000$</p>
             <p class="text-xs mono" id="gold-calc-tp3" style="color:#52525b;">—</p>
           </div>
         </div>
@@ -602,6 +602,28 @@ textarea.input { resize: vertical; min-height: 60px; }
   </div>
 </div>
 
+<!-- MODAL SUPPRIMER SIM -->
+<div class="modal-overlay" id="modal-delete-sim">
+  <div class="modal" style="max-width:400px;">
+    <div class="flex items-center justify-between px-5 py-4 flex-shrink-0" style="border-bottom:1px solid rgba(255,255,255,0.06);">
+      <p class="text-sm font-medium text-white">Supprimer le compte</p>
+      <button class="btn-icon" onclick="closeModal('modal-delete-sim')"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="px-5 py-5">
+      <div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:14px;">
+        <p class="text-sm font-medium pnl-neg mb-2">Suppression définitive</p>
+        <p class="text-xs" style="color:#a1a1aa;">Le compte <strong id="delete-sim-name" class="text-white"></strong> et tous ses trades seront supprimés définitivement. Cette action est irréversible.</p>
+      </div>
+    </div>
+    <div class="flex items-center justify-end gap-2 px-5 py-4 flex-shrink-0" style="border-top:1px solid rgba(255,255,255,0.06);">
+      <button class="btn-ghost" onclick="closeModal('modal-delete-sim')">Annuler</button>
+      <button class="btn-danger" id="btn-delete-sim-confirm" onclick="confirmDeleteSim()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="m19 6-1 14H6L5 6"/></svg>Supprimer définitivement
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL NOUVELLE RÈGLE TP -->
 <div class="modal-overlay" id="modal-new-rule">
   <div class="modal" style="max-width:620px;">
@@ -693,6 +715,7 @@ let currentGoldSessionId = null
 let currentMemberId      = null
 let perfPeriod     = 'season'
 let resetSeasonId  = null
+let deleteSimId    = null
 let goldUploadUrl  = null
 let priceInterval  = null
 
@@ -788,45 +811,64 @@ function setConfidence(v) {
   updateGoldCalcs()
 }
 
-// ─── CALCULS GOLD (pip corrigé) ───────────────────────────────
-// XAU/USD : 1 pip = $0.10 move → 0.01 lot = $1/pip
-// lot = risk_usd / (sl_pips * 10)
-function calcGoldLot(capital, confLevel, slPips) {
-  const confMap = {1:0.5, 2:0.75, 3:1.0, 4:1.5, 5:2.0}
-  const riskPct = confMap[confLevel] || 1.0
-  const riskUsd = capital * riskPct / 100
-  if (slPips <= 0) return {lot: 0, riskUsd, riskPct}
-  const lot = riskUsd / (slPips * 10)
-  return {lot: Math.round(lot * 100) / 100, riskUsd: Math.round(riskUsd * 100) / 100, riskPct}
+// ─── CALCULS GOLD — CORRECTION v3 ────────────────────────────
+// sl_pips = abs(entry - sl) — différence brute, pas de multiplicateur
+// lot = (capital/diviseur * 0.01) / sl_pips
+// perte = (lot / 0.01) * sl_pips
+// 1 pt de mouvement = 1$ pour 0.01 lot
+
+function getDiv(capital) {
+  if (capital < 1500) return 12
+  return 12 + Math.floor((capital - 1001) / 500)
+}
+
+function calcLot(capital, slPips) {
+  if (capital < 250) return 0.01
+  if (capital < 500) return 0.015
+  if (slPips <= 0)   return 0.01
+  const loss = capital / getDiv(capital)
+  const lot  = (loss * 0.01) / slPips
+  return Math.max(0.01, Math.floor(lot * 100) / 100)
+}
+
+function calcGain(lot, pips) {
+  return Math.round((lot / 0.01) * pips * 100) / 100
 }
 
 function updateGoldCalcs() {
   const entry = parseFloat(document.getElementById('gold-entry')?.value) || 0
   const sl    = parseFloat(document.getElementById('gold-sl')?.value)    || 0
   const tp1   = parseFloat(document.getElementById('gold-tp1')?.value)   || 0
-  const tp2   = parseFloat(document.getElementById('gold-tp2')?.value)   || 0
-  const tp3   = parseFloat(document.getElementById('gold-tp3')?.value)   || 0
   if (!entry || !sl) return
 
-  const mult   = 10
-  const slPips = Math.round(Math.abs(entry - sl) * mult * 10) / 10
-  const t1Pips = tp1 ? Math.round(Math.abs(tp1 - entry) * mult * 10) / 10 : 0
-  const t2Pips = tp2 ? Math.round(Math.abs(tp2 - entry) * mult * 10) / 10 : 0
-  const t3Pips = tp3 ? Math.round(Math.abs(tp3 - entry) * mult * 10) / 10 : 0
+  // CORRECTION : différence brute abs(entry-sl)
+  const slPips  = Math.round(Math.abs(entry - sl) * 100) / 100
+  const tp1Pips = tp1 ? Math.round(Math.abs(tp1 - entry) * 100) / 100 : 0
 
-  document.getElementById('gold-sl-pips').textContent  = slPips + ' pips'
-  document.getElementById('gold-tp1-pips').textContent = t1Pips ? t1Pips + ' pips' : '—'
-  document.getElementById('gold-rr').textContent       = slPips > 0 && t1Pips > 0 ? '1:' + (t1Pips/slPips).toFixed(1) : '—'
+  document.getElementById('gold-sl-pips').textContent  = slPips + ' pts'
+  document.getElementById('gold-tp1-pips').textContent = tp1Pips ? tp1Pips + ' pts' : '—'
+  document.getElementById('gold-rr').textContent       = slPips > 0 && tp1Pips > 0 ? '1:' + (tp1Pips/slPips).toFixed(1) : '—'
 
-  function gainForLot(lot, pips) { return Math.round(lot * pips * 10 * 100) / 100 }
+  // Col 1 : < 250$ → 0.01 fixe
+  const lot1  = 0.01
+  const loss1 = Math.round((lot1 / 0.01) * slPips * 100) / 100
+  const gain1 = tp1Pips ? calcGain(lot1, tp1Pips) : 0
+  document.getElementById('gold-calc-tp1').innerHTML =
+    `<span style="color:#f59e0b;">Lot: ${lot1}</span><br><span style="color:#ef4444;">-${loss1}$</span>${gain1?`<br><span style="color:#22c55e;">+${gain1}$</span>`:''}`
 
-  const caps = [{cap:300,t:'tp1',pips:t1Pips,id:'gold-calc-tp1'}, {cap:1000,t:'tp2',pips:t2Pips||t1Pips,id:'gold-calc-tp2'}, {cap:3000,t:'tp3',pips:t3Pips||t2Pips||t1Pips,id:'gold-calc-tp3'}]
-  caps.forEach(({cap, pips, id}) => {
-    const {lot, riskUsd} = calcGoldLot(cap, goldConfidence, slPips)
-    const gain = pips ? gainForLot(lot, pips) : 0
-    const el   = document.getElementById(id)
-    if (el) el.innerHTML = `<span style="color:#f59e0b;">Lot: ${lot}</span><br><span style="color:#ef4444;">-${riskUsd}$</span><br><span style="color:#22c55e;">+${gain}$</span>`
-  })
+  // Col 2 : 500$, div=12
+  const lot2  = calcLot(500, slPips)
+  const loss2 = Math.round((lot2 / 0.01) * slPips * 100) / 100
+  const gain2 = tp1Pips ? calcGain(lot2, tp1Pips) : 0
+  document.getElementById('gold-calc-tp2').innerHTML =
+    `<span style="color:#f59e0b;">Lot: ${lot2}</span><br><span style="color:#ef4444;">-${loss2}$</span>${gain2?`<br><span style="color:#22c55e;">+${gain2}$</span>`:''}`
+
+  // Col 3 : 2000$, div=13
+  const lot3  = calcLot(2000, slPips)
+  const loss3 = Math.round((lot3 / 0.01) * slPips * 100) / 100
+  const gain3 = tp1Pips ? calcGain(lot3, tp1Pips) : 0
+  document.getElementById('gold-calc-tp3').innerHTML =
+    `<span style="color:#f59e0b;">Lot: ${lot3}</span><br><span style="color:#ef4444;">-${loss3}$</span>${gain3?`<br><span style="color:#22c55e;">+${gain3}$</span>`:''}`
 }
 
 // ─── LIVE DASHBOARD ──────────────────────────────────────────
@@ -1163,6 +1205,10 @@ async function publishGoldSession() {
   const sl    = document.getElementById('gold-sl')?.value
   const tp1   = document.getElementById('gold-tp1')?.value
   if (!entry || !sl || !tp1) { toast('Entrée, SL et TP1 requis','error'); return }
+
+  const btn = document.getElementById('btn-publish')
+  btn.disabled = true; btn.textContent = 'Publication...'
+
   const payload = {
     direction:        goldDir,
     entry_price:      parseFloat(entry),
@@ -1178,8 +1224,11 @@ async function publishGoldSession() {
     screenshot_url:   goldUploadUrl||null,
   }
   try {
-    await gold('/sessions', {method:'POST', body:JSON.stringify(payload)})
-    toast('Session Gold créée — teaser envoyé ✓','success')
+    const result = await gold('/sessions', {method:'POST', body:JSON.stringify(payload)})
+    const sent   = result.broadcast_report?.sent ?? 0
+    const warn   = result.broadcast_warning
+    if (warn) toast('Trade créé — teaser non envoyé (bot non configuré)', 'warning')
+    else      toast(`Session Gold créée${sent>0?' — teaser envoyé à '+sent+' membres':''} ✓`, 'success')
     closeModal('modal-gold-publish')
     ;['gold-entry','gold-sl','gold-tp1','gold-tp2','gold-tp3','gold-note'].forEach(id => {
       const e = document.getElementById(id); if(e) e.value=''
@@ -1187,6 +1236,7 @@ async function publishGoldSession() {
     setGoldDir('buy'); setConfidence(3); updateGoldCalcs()
     loadLiveDashboard()
   } catch(e) { toast('Erreur: '+e.message,'error') }
+  finally { btn.disabled=false; btn.innerHTML='<svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="m22 2-7 20-4-9-9-4 20-7z"/></svg>Publier →' }
 }
 
 // ─── SAISONS ─────────────────────────────────────────────────
@@ -1289,12 +1339,17 @@ async function loadSimulations() {
     main.innerHTML = `
       <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
         ${accounts.map(acc => `
-          <div class="sim-card" onclick="loadSimDetail(${acc.id}, this)">
+          <div class="sim-card">
             <div class="flex items-start justify-between mb-2">
-              <p class="text-xs font-medium text-zinc-200 truncate">${acc.name}</p>
-              <span class="badge ${acc.is_active?'badge-gold':'badge-zinc'} ml-1 flex-shrink-0" style="font-size:9px;">${acc.is_active?'Actif':'Off'}</span>
+              <p class="text-xs font-medium text-zinc-200 truncate flex-1">${acc.name}</p>
+              <div class="flex items-center gap-1 ml-2 flex-shrink-0">
+                <span class="badge ${acc.is_active?'badge-gold':'badge-zinc'} ml-1" style="font-size:9px;">${acc.is_active?'Actif':'Off'}</span>
+                <button class="btn-icon" style="width:24px;height:24px;" onclick="openDeleteSim(${acc.id},'${acc.name.replace(/'/g,"\\'")}')" title="Supprimer définitivement">
+                  <svg width="11" height="11" fill="none" stroke="#ef4444" viewBox="0 0 24 24" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="m19 6-1 14H6L5 6"/></svg>
+                </button>
+              </div>
             </div>
-            <p class="text-2xl font-light mono ${(acc.rendement_pct||0)>=0?'pnl-pos':'pnl-neg'}">${(acc.current_capital||0).toFixed(0)}$</p>
+            <p class="text-2xl font-light mono ${(acc.rendement_pct||0)>=0?'pnl-pos':'pnl-neg'} cursor-pointer" onclick="loadSimDetail(${acc.id})">${(acc.current_capital||0).toFixed(0)}$</p>
             <p class="text-xs mt-0.5" style="color:${(acc.rendement_pct||0)>=0?'#22c55e':'#ef4444'};">${(acc.rendement_pct||0)>0?'+':''}${(acc.rendement_pct||0).toFixed(2)}%</p>
             <div class="flex gap-2 mt-2 text-xs">
               <span class="pnl-pos">W:${acc.wins||0}</span>
@@ -1302,10 +1357,36 @@ async function loadSimulations() {
               <span style="color:#52525b;">DD:${(acc.max_drawdown_pct||0).toFixed(1)}%</span>
             </div>
             <p class="text-xs mt-1" style="color:#3f3f46;">Init: ${acc.initial_capital}$</p>
+            <button class="btn-ghost text-xs w-full justify-center mt-2" onclick="loadSimDetail(${acc.id})">Voir historique →</button>
           </div>`).join('')}
       </div>
       <div id="sim-detail"></div>`
   } catch(e) { main.innerHTML = `<div class="text-center py-16 text-sm pnl-neg">Erreur: ${e.message}</div>` }
+}
+
+// ─── DELETE SIM ───────────────────────────────────────────────
+function openDeleteSim(id, name) {
+  deleteSimId = id
+  document.getElementById('delete-sim-name').textContent = name
+  openModal('modal-delete-sim')
+}
+
+async function confirmDeleteSim() {
+  if (!deleteSimId) return
+  const btn = document.getElementById('btn-delete-sim-confirm')
+  btn.disabled = true; btn.textContent = 'Suppression...'
+  try {
+    await gold(`/simulations/${deleteSimId}`, {method:'DELETE'})
+    toast('Compte supprimé définitivement ✓', 'success')
+    closeModal('modal-delete-sim')
+    deleteSimId = null
+    loadSimulations()
+    loadLiveDashboard()
+  } catch(e) { toast('Erreur: '+e.message, 'error') }
+  finally {
+    btn.disabled = false
+    btn.innerHTML = '<svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="m19 6-1 14H6L5 6"/></svg>Supprimer définitivement'
+  }
 }
 
 async function loadSimDetail(accountId) {
@@ -1551,7 +1632,9 @@ async function handleGoldFile(file) {
     const res = await fetch(`${API_URL}/chat/media/upload`, {method:'POST', body:fd})
     if (!res.ok) throw new Error('Upload failed')
     const d = await res.json()
-    goldUploadUrl = d.url||d.media_url||d.file_url||d.path
+    // CORRECTION : URL complète avec domaine si chemin relatif
+    const rawUrl = d.url || d.media_url || d.file_url || d.path
+    goldUploadUrl = rawUrl.startsWith('http') ? rawUrl : `${API_URL}${rawUrl}`
     zone.innerHTML = `<p class="text-xs pnl-pos">✓ ${file.name}</p><button onclick="resetGoldUpload()" style="font-size:10px;color:#52525b;background:none;border:none;cursor:pointer;">Supprimer</button>`
     zone.style.borderColor = 'rgba(34,197,94,0.3)'
   } catch(e) { zone.innerHTML='<p class="text-xs pnl-neg">Erreur upload</p>'; toast('Erreur upload','error') }
