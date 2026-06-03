@@ -188,7 +188,7 @@ body{background:#09090b;font-family:'Geist',sans-serif;color:#e4e4e7;}
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       Formulaires
     </a>
-    <a href="#" class="nav-item">
+    <a href="/ai" class="nav-item">
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
       Agent IA
     </a>
@@ -222,7 +222,7 @@ body{background:#09090b;font-family:'Geist',sans-serif;color:#e4e4e7;}
         <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
         Actualiser
       </button>
-      <a href="journal.html" class="btn-primary">
+      <a href="/trade" class="btn-primary">
         <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="12" y1="4" x2="12" y2="20"/><line x1="4" y1="12" x2="20" y2="12"/></svg>
         Nouveau trade
       </a>
@@ -264,9 +264,7 @@ body{background:#09090b;font-family:'Geist',sans-serif;color:#e4e4e7;}
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════════════════════════
+
 const API_URL = 'https://fdkvip.com'
 
 async function apiFetch(path) {
