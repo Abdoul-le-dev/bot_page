@@ -489,7 +489,7 @@ function renderTrading(d) {
         </div>
         <p style="font-size:36px;font-weight:300;line-height:1;font-family:'Geist Mono',monospace;color:#38bdf8;">${_fmt(t.trades_ouverts)}</p>
         <p style="font-size:11px;color:#52525b;margin-top:8px;">trades ouverts en ce moment</p>
-        <a href="journal.html" style="display:inline-flex;align-items:center;gap:5px;margin-top:12px;font-size:11px;color:#38bdf8;text-decoration:none;">
+        <a href="/trade" style="display:inline-flex;align-items:center;gap:5px;margin-top:12px;font-size:11px;color:#38bdf8;text-decoration:none;">
           Voir le journal <span>→</span>
         </a>
       </div>
@@ -525,7 +525,7 @@ function renderGold(d) {
           <p style="font-size:13px;font-weight:500;color:#fafafa;">Session active — XAU/USD</p>
           <span style="padding:2px 8px;border-radius:99px;font-size:10px;font-weight:500;background:${phaseColor}18;color:${phaseColor};border:1px solid ${phaseColor}30;">${phaseLabel}</span>
         </div>
-        <a href="journal.html" style="font-size:11px;color:#52525b;text-decoration:none;display:flex;align-items:center;gap:4px;" onmouseover="this.style.color='#fbbf24'" onmouseout="this.style.color='#52525b'">Gérer →</a>
+        <a href="/trade" style="font-size:11px;color:#52525b;text-decoration:none;display:flex;align-items:center;gap:4px;" onmouseover="this.style.color='#fbbf24'" onmouseout="this.style.color='#52525b'">Gérer →</a>
       </div>
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">
         <div class="stat-gold text-center">
@@ -552,7 +552,7 @@ function renderGold(d) {
     </div>` : `
     <div class="card" style="text-align:center;padding:24px;">
       <p style="font-size:12px;color:#52525b;">Aucune session Gold active</p>
-      <a href="journal.html" style="display:inline-flex;align-items:center;gap:5px;margin-top:10px;font-size:11px;color:#fbbf24;text-decoration:none;">Créer un trade Gold →</a>
+      <a href="/trade" style="display:inline-flex;align-items:center;gap:5px;margin-top:10px;font-size:11px;color:#fbbf24;text-decoration:none;">Créer un trade Gold →</a>
     </div>`
 
   const simsHtml = sims.map(s => `
