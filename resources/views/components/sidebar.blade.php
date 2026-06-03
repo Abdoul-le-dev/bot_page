@@ -95,20 +95,12 @@
     {{-- Journal --}}
     <a href="{{ SB::navUrl('/trade', 'journal') }}" class="nav-item {{ request()->is('trade') && (request()->query('view','journal') === 'journal') ? 'active' : '' }}">
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-      Journal
+      Trade
     </a>
 
-    {{-- Paires & Pip --}}
-    <a href="{{ SB::navUrl('/trade', 'paires') }}" class="nav-item {{ request()->is('trade') && request()->query('view') === 'paires' ? 'active' : '' }}">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path d="M3 3v18h18"/><line x1="7" y1="17" x2="7" y2="9"/><line x1="12" y1="17" x2="12" y2="5"/><line x1="17" y1="17" x2="17" y2="12"/></svg>
-      Paires & Pip
-    </a>
+    
 
-    {{-- Formulaires & Collecte --}}
-    <a href="{{ SB::navUrl('/trade', 'formules') }}" class="nav-item {{ request()->is('trade') && request()->query('view') === 'formules' ? 'active' : '' }}">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
-      Formulaires & Collecte
-    </a>
+   
 
     <div class="nav-section" style="margin-top:6px;">Croissance</div>
 
@@ -125,18 +117,6 @@
       <span class="badge bdg-g ml-auto" id="nav-badge-jobs">0</span>
     </a>
 
-    {{-- Abonnements (plans) --}}
-    <a href="{{ SB::navUrl('/tache', 'subscriptions') }}" class="nav-item {{ request()->is('tache') && request()->query('view') === 'subscriptions' ? 'active' : '' }}">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
-      Abonnements (plans)
-    </a>
-
-    {{-- Promotions --}}
-    <a href="{{ SB::navUrl('/tache', 'promos') }}" class="nav-item {{ request()->is('tache') && request()->query('view') === 'promos' ? 'active' : '' }}">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-      Promotions
-    </a>
-
   </nav>
 
   <!-- Footer admin -->
@@ -145,7 +125,7 @@
       <div style="width:27px;height:27px;border-radius:50%;background:linear-gradient(135deg,#0ea5e9,#6366f1);flex-shrink:0;"></div>
       <div style="flex:1;min-width:0;">
         <p style="font-size:12px;font-weight:500;color:#d4d4d8;">Admin</p>
-        <p style="font-size:10px;color:#3f3f46;">admin@tradingbot.io</p>
+        <p style="font-size:10px;color:#3f3f46;">FiacreKpanou@gmail.com</p>
       </div>
     </div>
   </div>
