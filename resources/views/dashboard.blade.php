@@ -25,7 +25,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="dashboard.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
 </head>
 
 <body class="bg-[#09090b] text-zinc-300 font-sans h-screen overflow-hidden">
@@ -230,6 +230,6 @@
   </div>
 </div>
 
-<script src="dashboard.js"></script>
+<script src="../js/dashboard.js"></script>
 </body>
 </html>
