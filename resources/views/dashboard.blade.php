@@ -25,7 +25,7 @@
   </script>
 
   <!-- Styles du dashboard -->
-  <link rel="stylesheet" href="dashboard.css">
+  
   <style>
     /* ═══════════════════════════════════════════════════════════
    dashboard.css — TradingBot Dashboard
@@ -833,7 +833,7 @@ body {
 </div><!-- /app-shell -->
 
 <!-- Scripts -->
-<script src="dashboard.js"></script>
+
 <script src="">
   /* ═══════════════════════════════════════════════════════════
    dashboard.js — TradingBot Dashboard
