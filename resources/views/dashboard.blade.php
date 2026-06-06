@@ -41,9 +41,11 @@
 <div class="flex h-screen overflow-hidden">
 
   <!-- ═══ SIDEBAR ═══ -->
+  <!-- Sur mobile : fixed + w-[200px] mais le flex parent ne lui réserve PAS de place (md:flex-shrink-0) -->
   <aside id="sidebar"
-         class="fixed md:static top-0 left-0 h-full w-[200px] flex-shrink-0
-                bg-[#0d0d0f] border-r border-white/5
+         class="fixed md:static top-0 left-0 h-full w-[200px]
+                md:flex-shrink-0
+                bg-[#0d0d0f] border-r md:border-r border-white/5
                 flex flex-col z-[100]
                 -translate-x-full md:translate-x-0
                 transition-transform duration-[250ms] ease-in-out">
@@ -233,3 +235,4 @@
 <script src="../js/dashboard.js"></script>
 </body>
 </html>
+
