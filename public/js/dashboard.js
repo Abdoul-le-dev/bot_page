@@ -337,7 +337,7 @@ function renderGold(d) {
         </div>
       </div>
     </div>` : `
-    <div class="card" style="text-align:center;padding:24px;">
+    <div class="card" style="text-align:center;padding:24px; display:none">
       <p style="font-size:12px;color:#52525b;">Aucune session Gold active</p>
       <a href="/trade" style="display:inline-flex;align-items:center;gap:5px;margin-top:10px;font-size:11px;color:#fbbf24;text-decoration:none;">Créer un trade Gold →</a>
     </div>`
