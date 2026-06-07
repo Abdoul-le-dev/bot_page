@@ -14,16 +14,16 @@
 
 <body class="text-zinc-200" style="height:100vh; overflow:hidden;">
 
-    @include('components.sidebar_mobile')
+ 
 
     <div style="display:flex; height:100vh; overflow:hidden;">
 
-        @include('components.sidebar')
+        
 
         <!-- ─── MAIN ─────────────────────────────────────────────────────── -->
         <div style="flex:1; display:flex; flex-direction:column; min-width:0; overflow:hidden;">
 
-            @include('components.messages_topbar')
+           
 
             <!-- Page content -->
             <main style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:14px;">
