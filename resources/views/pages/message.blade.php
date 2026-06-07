@@ -448,7 +448,7 @@
         </div>
     </div>
 
-    @include('components.messages_modals')
+    
 
     <script src="../js/dashboard.js"></script>
     <script src="../js/messages.js"></script>
