@@ -1425,7 +1425,7 @@ document.querySelectorAll('.tab').forEach(tab => {
 })
 </script>
 
-<script type="module" src="../js/chat_app.js" defer></script>
+<script type="module" src="../js/chats.js" defer></script>
 
 </body>
 </html>
