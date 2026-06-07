@@ -567,6 +567,19 @@ select.inp   { cursor: pointer; }
   animation: fadein .2s ease;
 }
 
+
+/* ── Barre secondaire (tabs) — mobile uniquement ─── */
+#topbar-mobile-tabs {
+  display: none; /* caché par défaut */
+  flex-shrink: 0;
+  align-items: center;
+  padding: 0 12px;
+  height: 40px;
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--border);
+  gap: 4px;
+}
+
 /* ════════════════════════════════════════════════════════
    RESPONSIVE
    ════════════════════════════════════════════════════════ */
@@ -597,8 +610,10 @@ select.inp   { cursor: pointer; }
   #topbar { padding: 0 10px; gap: 6px; }
   .topbar-sub { display: none; }
   .topbar-title { font-size: 13px; }
-  .tab-label { display: none; }
-  .topbar-tab { padding: 5px 8px; gap: 0; }
+  /* Masquer les tabs dans la topbar sur mobile */
+  #topbar .topbar-tabs { display: none; }
+  /* Afficher la barre secondaire sous la topbar */
+  #topbar-mobile-tabs { display: flex; }
 
   #page-content { padding: 10px; gap: 10px; }
 
@@ -760,6 +775,18 @@ select.inp   { cursor: pointer; }
 
       </div>
     </header>
+
+    <!-- Barre secondaire — tabs visible uniquement sur mobile -->
+    <div id="topbar-mobile-tabs">
+      <button class="topbar-tab active" id="mob-tab-compose" onclick="switchView('compose', this); syncTabs(this, 'compose')">
+        <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4 20-7z"/></svg>
+        <span>Composer</span>
+      </button>
+      <button class="topbar-tab" id="mob-tab-history" onclick="switchView('history', this); syncTabs(this, 'history')">
+        <svg viewBox="0 0 24 24" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span>Historique</span>
+      </button>
+    </div>
 
     <!-- ── PAGE CONTENT ── -->
     <main id="page-content">
@@ -1333,6 +1360,18 @@ document.addEventListener('click', e => {
 /* ════════════════════════════════════════════════
    VUES
    ════════════════════════════════════════════════ */
+function syncTabs(clickedEl, view) {
+  // Synchronise la barre mobile avec les tabs desktop et vice versa
+  const desktopTabs = document.querySelectorAll('#topbar .topbar-tab')
+  const mobileTabs  = document.querySelectorAll('#topbar-mobile-tabs .topbar-tab')
+  desktopTabs.forEach(t => t.classList.remove('active'))
+  mobileTabs.forEach(t => t.classList.remove('active'))
+
+  // Activer le bon tab dans les deux barres
+  desktopTabs.forEach(t => { if (t.getAttribute('onclick')?.includes("'" + view + "'")) t.classList.add('active') })
+  mobileTabs.forEach(t  => { if (t.getAttribute('onclick')?.includes("'" + view + "'")) t.classList.add('active') })
+}
+
 function switchView(view, el) {
   document.getElementById('view-compose').style.display = view === 'compose' ? 'flex' : 'none'
   const histEl = document.getElementById('view-history')
