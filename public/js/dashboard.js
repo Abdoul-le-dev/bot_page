@@ -304,7 +304,7 @@ function renderGold(d) {
   const phaseLabel = phaseLabels[sess.current_phase] || (sess.current_phase || '—')
 
   const sessionBlock = Object.keys(sess).length ? `
-    <div class="card-gold">
+    <div class="card-gold" sytle="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
           <span class="live-dot pulse" style="background:#fbbf24;"></span>
