@@ -336,7 +336,11 @@ function renderGold(d) {
           <p style="font-size:9px;color:#52525b;margin-top:3px;">Gain TP2</p>
         </div>
       </div>
-    </div>` 
+    </div>` : `
+    <div class="card" style="text-align:center;padding:24px;">
+      <p style="font-size:12px;color:#52525b;">Aucune session Gold active</p>
+      <a href="/trade" style="display:inline-flex;align-items:center;gap:5px;margin-top:10px;font-size:11px;color:#fbbf24;text-decoration:none;">Créer un trade Gold →</a>
+    </div>`
 
   const simsHtml = sims.map(s => `
     <div class="sim-card">
