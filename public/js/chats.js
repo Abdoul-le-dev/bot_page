@@ -1,569 +1,656 @@
 /* ══════════════════════════════════════════════════════════════════════
-   chat_app.js — Orchestration, state global, logique métier
+   chat_app.js — Orchestrateur principal
+   - Badges unread basés sur localStorage (dernier msg lu par conv)
+   - Auto-scroll à l'ouverture
+   - Remontée automatique des convs (comme WhatsApp)
+   - Polling sans saut visuel
    ══════════════════════════════════════════════════════════════════════ */
 
 import * as API    from './chat_api.js'
 import * as Render from './chat_render.js'
 
-// ── Types de fichiers acceptés (alignés avec ALLOWED_MEDIA backend) ──
+// ── Constantes ────────────────────────────────────────────────────────
+const POLL_MSG_MS   = 4000   // polling nouveaux messages conv active
+const POLL_CONV_MS  = 8000   // polling liste conversations
+const MSG_LIMIT     = 60
+const LS_LAST_READ  = 'fdk_last_read_'   // + userId → dernier msg_id lu
+const LS_LAST_READ_TS = 'fdk_last_read_ts_' // + userId → timestamp lecture
+const LS_DRAFT      = 'fdk_draft_'
+const LS_ACTIVE     = 'fdk_active_conv'
+const LS_TAB        = 'fdk_active_tab'
+const LS_SCROLL     = 'fdk_scroll_'
+
+// ── Types fichiers acceptés ───────────────────────────────────────────
 const ACCEPTED_FILES = [
-  'image/jpeg', 'image/png', 'image/gif', 'image/webp',
-  'video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/x-matroska', 'video/webm',
-  'application/pdf',
-  'application/msword',
+  'image/jpeg','image/png','image/gif','image/webp',
+  'video/mp4','video/quicktime','video/x-msvideo','video/x-matroska','video/webm',
+  'application/pdf','application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'application/vnd.ms-excel',
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   'application/vnd.ms-powerpoint',
   'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-  'text/plain',
-  'application/zip',
-  'application/x-rar-compressed',
+  'text/plain','application/zip','application/x-rar-compressed',
 ]
 
-// ── Mapping mime_type → type simplifié (identique au backend) ──────────
-const MIME_TO_TYPE = {
-  'image/jpeg': 'image', 'image/png': 'image', 'image/gif': 'image', 'image/webp': 'image',
-  'video/mp4': 'video', 'video/quicktime': 'video', 'video/x-msvideo': 'video',
-  'video/x-matroska': 'video', 'video/webm': 'video',
-  'application/pdf': 'pdf',
-  'application/msword': 'word',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'word',
-  'application/vnd.ms-excel': 'excel',
-  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'excel',
-  'application/vnd.ms-powerpoint': 'powerpoint',
-  'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'powerpoint',
-  'text/plain': 'text',
-  'application/zip': 'archive',
-  'application/x-rar-compressed': 'archive',
+// ── State ─────────────────────────────────────────────────────────────
+const S = {
+  convs:       [],
+  uid:         null,   // userId conversation active
+  conv:        null,   // objet conversation actif
+  profile:     null,
+  messages:    [],
+  oldestId:    null,
+  newestId:    null,
+  tab:         'all',
+  search:      '',
+  replyId:     null,
+  replyText:   null,
+  uploadFile:  null,
+  uploadResult:null,
+  sending:     false,
+  _pollMsg:    null,
+  _pollConv:   null,
+  _atBottom:   true,   // l'utilisateur est en bas du feed
+  _loading:    false,
 }
 
-// ── State global ──────────────────────────────────────────────────────
-const State = {
-  conversations:    [],
-  currentUserId:    null,
-  currentConv:      null,
-  currentProfile:   null,
-  messages:         [],
-  oldestMessageId:  null,
-  newestMessageId:  null,
-  tab:              'all',
-  search:           '',
-  replyToId:        null,
-  replyToText:      null,
-  uploadFile:       null,       // File object sélectionné
-  uploadResult:     null,       // Réponse du serveur après upload
-  uploadMimeType:   null,       // mime_type du fichier en cours
-  sending:          false,
-  pollingTimer:     null,
-  loadingMessages:  false,
+const $ = id => document.getElementById(id)
+
+// ══════════════════════════════════════════════════════════════════════
+// localStorage helpers
+// ══════════════════════════════════════════════════════════════════════
+function lsGet(k)      { try { return localStorage.getItem(k) }       catch { return null } }
+function lsSet(k, v)   { try { localStorage.setItem(k, String(v)) }   catch {} }
+function lsDel(k)      { try { localStorage.removeItem(k) }           catch {} }
+
+// Nettoyage des entrées > 30 jours
+function lsClean() {
+  const MAX = 30 * 86400 * 1000
+  const now = Date.now()
+  try {
+    Object.keys(localStorage)
+      .filter(k => k.startsWith('fdk_'))
+      .forEach(k => {
+        if (!k.includes('_ts_')) return
+        const ts = parseInt(localStorage.getItem(k) || '0')
+        if (now - ts > MAX) {
+          const base = k.replace('_ts_', '_')
+          lsDel(k); lsDel(base)
+        }
+      })
+  } catch {}
 }
 
-// ── Refs DOM ──────────────────────────────────────────────────────────
-const $ = (id) => document.getElementById(id)
+// ── Dernier message lu par conversation ───────────────────────────────
+function getLastRead(userId)       { return parseInt(lsGet(LS_LAST_READ + userId) || '0') }
+function setLastRead(userId, msgId){ lsSet(LS_LAST_READ + userId, msgId); lsSet(LS_LAST_READ_TS + userId, Date.now()) }
 
-// ── Init ──────────────────────────────────────────────────────────────
+// Calcule le vrai unread_count côté client à partir du last_read
+// On fait confiance au serveur pour unread_count mais on le corrige
+// si l'admin a déjà lu jusqu'à un msg_id plus récent
+function getEffectiveUnread(conv) {
+  const lastRead = getLastRead(conv.user_id)
+  if (!lastRead) return conv.unread_count || 0
+  // Si le dernier msg connu est <= lastRead → déjà tout lu
+  if (conv.last_message_id && conv.last_message_id <= lastRead) return 0
+  return conv.unread_count || 0
+}
 
+// ══════════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════════
 async function init() {
+  lsClean()
+
+  S.tab = lsGet(LS_TAB) || 'all'
+  _activateTab(S.tab)
+
   await loadConversations()
 
+  // Restaurer conv active
+  const savedUid = lsGet(LS_ACTIVE)
+  if (savedUid) {
+    const item = $(`conv-${savedUid}`)
+    if (item) selectConv(parseInt(savedUid), item)
+  }
+
+  // File input
   const fi = $('file-input')
   if (fi) {
     fi.setAttribute('accept', ACCEPTED_FILES.join(','))
-    fi.addEventListener('change', (e) => {
-      if (e.target.files.length) previewUpload(e.target.files[0])
+    fi.addEventListener('change', e => {
+      if (e.target.files.length) _previewUpload(e.target.files[0])
     })
   }
+
+  // Scroll tracking
+  $('messages-feed')?.addEventListener('scroll', function() {
+    S._atBottom = this.scrollHeight - this.scrollTop - this.clientHeight < 80
+    if (S.uid) lsSet(LS_SCROLL + S.uid, this.scrollTop)
+  })
+
+  // Compose input → draft + counter
+  $('compose-input')?.addEventListener('input', function() {
+    autoResize(this)
+    if (S.uid) {
+      if (this.value) lsSet(LS_DRAFT + S.uid, this.value)
+      else            lsDel(LS_DRAFT + S.uid)
+    }
+    const c = $('compose-count')
+    if (c) c.textContent = `${this.value.length} / 4096`
+  })
+
+  // Escape
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeProfilePanel()
+  })
+
+  // Resize
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 700) {
+      $('conv-col')?.classList.remove('hidden-mobile')
+      $('messages-col')?.classList.remove('visible', 'visible-mobile')
+    }
+    if (window.innerWidth > 1024) closeProfilePanel()
+  })
+
+  // Polling conversations
+  S._pollConv = setInterval(pollConversations, POLL_CONV_MS)
 }
 
-// ── Conversations ─────────────────────────────────────────────────────
-
+// ══════════════════════════════════════════════════════════════════════
+// CONVERSATIONS
+// ══════════════════════════════════════════════════════════════════════
 async function loadConversations() {
   try {
-    const data = await API.apiGetConversations(State.tab, State.search)
-    State.conversations = data.conversations || []
-    renderConvList()
-
-    const stats = await API.apiGetConversationStats()
-    const badge = document.querySelector('.nav-item.active .badge-sky')
-    const unreadCount = document.getElementById('tab-unread-count')
-    if (unreadCount) unreadCount.textContent = stats.total_unread || ''
-    const adminCount = document.getElementById('tab-admin-count')
-    if (adminCount) adminCount.textContent = stats.requires_admin_count || ''
-    if (badge && stats.total_unread) badge.textContent = stats.total_unread
+    const data = await API.apiGetConversations(S.tab, S.search)
+    S.convs = data.conversations || data || []
+    _renderConvList()
+    _updateStats()
   } catch (e) {
-    Render.toast('Erreur chargement conversations', 'error')
+    console.warn('[chat_app] loadConversations:', e.message)
+    const el = $('conv-list')
+    if (el) el.innerHTML = _empty('Impossible de charger')
   }
 }
 
-function renderConvList() {
-  const list = $('conv-list')
-  if (!list) return
-  list.innerHTML = State.conversations.map(Render.renderConvItem).join('')
+async function pollConversations() {
+  try {
+    const data  = await API.apiGetConversations(S.tab, S.search)
+    const fresh = data.conversations || data || []
+
+    // Détecter changements pour éviter re-render inutile
+    const changed = fresh.some(fc => {
+      const old = S.convs.find(c => c.user_id === fc.user_id)
+      return !old
+        || old.last_message    !== fc.last_message
+        || old.unread_count    !== fc.unread_count
+        || old.last_message_id !== fc.last_message_id
+    })
+
+    if (changed) {
+      S.convs = fresh
+      _renderConvList()
+      _updateStats()
+    }
+  } catch { /* silencieux */ }
 }
 
-async function selectConv(userId, el) {
-  document.querySelectorAll('.conv-item').forEach(c => c.classList.remove('active'))
-  el?.classList.add('active')
+// Remontée automatique d'une conv (nouveau message reçu/envoyé)
+function _bumpConv(userId) {
+  const idx = S.convs.findIndex(c => String(c.user_id) === String(userId))
+  if (idx > 0) {
+    const [conv] = S.convs.splice(idx, 1)
+    S.convs.unshift(conv)
+    _renderConvList()
+  }
+}
 
-  State.currentUserId   = userId
-  State.messages        = []
-  State.oldestMessageId = null
-  State.newestMessageId = null
+function _renderConvList() {
+  const el = $('conv-list')
+  if (!el) return
+  const q = S.search.toLowerCase()
+  const list = q ? S.convs.filter(c => (c.name || '').toLowerCase().includes(q)) : S.convs
 
-  API.apiMarkRead(userId).catch(() => {})
-
-  try {
-    const [conv, profile] = await Promise.all([
-      API.apiGetConversation(userId),
-      API.apiGetProfile(userId),
-    ])
-    State.currentConv    = conv
-    State.currentProfile = profile
-    updateChatHeader(conv, profile)
-    updateProfilePanel(profile)
-  } catch (e) {
-    Render.toast('Erreur chargement conversation', 'error')
+  if (!list.length) {
+    el.innerHTML = _empty(q ? 'Aucun résultat' : 'Aucune conversation')
     return
   }
 
-  await loadMessages()
+  // Reconstruire le HTML avec unread corrigé côté client
+  el.innerHTML = list.map(conv => {
+    const effectiveUnread = getEffectiveUnread(conv)
+    return Render.renderConvItem({ ...conv, unread_count: effectiveUnread })
+  }).join('')
 
+  // Restaurer la sélection active
+  if (S.uid) $(`conv-${S.uid}`)?.classList.add('active')
+}
+
+function _updateStats() {
+  // Compter avec correction client
+  const totalUnread = S.convs.reduce((sum, c) => sum + getEffectiveUnread(c), 0)
+  const adminCount  = S.convs.filter(c => c.requires_admin).length
+
+  const navBadge = $('nav-unread-badge')
+  if (navBadge) {
+    navBadge.textContent = totalUnread || ''
+    navBadge.style.display = totalUnread ? '' : 'none'
+  }
+  const adminBadge = $('tab-admin-count')
+  if (adminBadge) adminBadge.textContent = adminCount || ''
+  const unreadBadge = $('tab-unread-count')
+  if (unreadBadge) unreadBadge.textContent = totalUnread || ''
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// SÉLECTION CONVERSATION
+// ══════════════════════════════════════════════════════════════════════
+async function selectConv(userId, el) {
+  // Stop polling précédent
+  clearInterval(S._pollMsg)
+
+  // Activer visuellement
+  document.querySelectorAll('.conv-item').forEach(c => c.classList.remove('active'))
+  el?.classList.add('active')
+
+  S.uid    = userId
+  S.conv   = S.convs.find(c => String(c.user_id) === String(userId)) || {}
+  S._atBottom = true
+  lsSet(LS_ACTIVE, userId)
+
+  // Mettre à jour le header immédiatement (nom déjà connu)
+  _updateHeader(S.conv, null)
+
+  // Sur mobile : afficher le panneau messages
   if (window.innerWidth <= 700) {
     $('conv-col')?.classList.add('hidden-mobile')
     $('messages-col')?.classList.add('visible')
   }
 
-  startPolling()
-}
-
-function updateChatHeader(conv, profile) {
-  if (!conv || !profile) return
-  const avClass = Render.avatarClass(profile.name)
-  const avTxt   = Render.avatarText(profile.name, profile.name)
-
-  const chatAv = $('chat-av')
-  if (chatAv) {
-    chatAv.className  = `av ${avClass}`
-    chatAv.style.cssText = 'width:32px;height:32px;font-size:12px;'
-    chatAv.textContent = avTxt
-  }
-  const chatName = $('chat-name')
-  if (chatName) chatName.textContent = profile.name || ''
-
-  const chatHandle = $('chat-handle')
-  if (chatHandle) chatHandle.textContent = `${profile.name || ''} · ID ${conv.user_id}`
-
-  $('blocked-banner').style.display  = conv.is_blocked ? 'flex' : 'none'
-  $('ia-banner').style.display       = (!conv.is_blocked && conv.ia_enabled) ? 'flex' : 'none'
-  $('compose-area').style.display    = conv.is_blocked ? 'none' : 'block'
-
-  const toggle = $('ia-toggle')
-  if (toggle) toggle.className = 'toggle' + (conv.ia_enabled ? ' on' : '')
-
-  const input = $('compose-input')
-  if (input) input.placeholder = `Envoyer un message à ${profile.name || 'ce membre'}…`
-}
-
-function updateProfilePanel(profile) {
-  const col = $('profile-col')
-  if (!col || !profile) return
-  col.innerHTML = Render.renderProfile(profile)
-}
-
-// ── Messages ──────────────────────────────────────────────────────────
-
-async function loadMessages() {
-  if (State.loadingMessages || !State.currentUserId) return
-  State.loadingMessages = true
+  // Loader discret
+  _showLoader()
 
   try {
-    const data = await API.apiGetMessages(State.currentUserId, 50)
-    State.messages = data.messages || []
+    // Charger messages + profil en parallèle
+    const [msgsData, profile] = await Promise.all([
+      API.apiGetMessages(userId, MSG_LIMIT),
+      API.apiGetProfile(userId).catch(() => null),
+    ])
 
-    if (State.messages.length) {
-      State.oldestMessageId = State.messages[0].id
-      State.newestMessageId = State.messages[State.messages.length - 1].id
+    S.messages  = msgsData.messages || msgsData || []
+    S.oldestId  = S.messages.length ? S.messages[0].id : null
+    S.newestId  = S.messages.length ? S.messages[S.messages.length - 1].id : null
+    S.profile   = profile
+
+    // ── Marquer comme lu : on retient le dernier msg_id ─────────────
+    if (S.newestId) {
+      setLastRead(userId, S.newestId)
     }
 
-    renderMessagesFeed(true)
+    // Mettre à jour le unread dans State local → badge = 0
+    const convIdx = S.convs.findIndex(c => String(c.user_id) === String(userId))
+    if (convIdx !== -1) S.convs[convIdx].unread_count = 0
+
+    // Mettre à jour le badge sur l'item de la liste
+    _clearConvBadge(userId)
+    _updateStats()
+
+    // Mettre à jour le header avec le profil complet
+    if (profile) _updateHeader(S.conv, profile)
+
+    // Rendre le profil
+    _renderProfile(profile)
+
+    // Rendre le feed
+    _renderFeed()
+
+    // Scroll : position sauvegardée ou bas par défaut
+    const saved = lsGet(LS_SCROLL + userId)
+    _scrollFeed(saved ? parseInt(saved) : 'bottom')
+
+    // Zone de saisie
+    _showCompose()
+
+    // Restaurer le brouillon
+    const draft = lsGet(LS_DRAFT + userId)
+    const inp   = $('compose-input')
+    if (inp) {
+      inp.value = draft || ''
+      autoResize(inp)
+      inp.placeholder = `Envoyer un message à ${(S.conv.name || '').split(' ')[0] || ''}…`
+    }
+
+    // API mark read (serveur)
+    API.apiMarkRead(userId).catch(() => {})
+
+    // Démarrer le polling
+    S._pollMsg = setInterval(() => _pollMessages(userId), POLL_MSG_MS)
+
   } catch (e) {
-    Render.toast('Erreur chargement messages', 'error')
-  } finally {
-    State.loadingMessages = false
+    $('messages-feed').innerHTML = _empty('Erreur de chargement')
+    Render.toast('Erreur chargement conversation', 'error')
   }
 }
 
-async function loadOlderMessages() {
-  if (State.loadingMessages || !State.currentUserId || !State.oldestMessageId) return
-  State.loadingMessages = true
+// Supprime le badge unread sur l'item de la liste
+function _clearConvBadge(userId) {
+  const item = $(`conv-${userId}`)
+  if (!item) return
+  // Retirer tous les badges numériques
+  item.querySelectorAll('[style*="border-radius:50%"]').forEach(b => b.remove())
+  item.querySelectorAll('.unread-badge').forEach(b => b.remove())
+}
 
-  const feed       = $('messages-feed')
-  const prevHeight = feed?.scrollHeight || 0
+// ══════════════════════════════════════════════════════════════════════
+// POLLING NOUVEAUX MESSAGES
+// ══════════════════════════════════════════════════════════════════════
+async function _pollMessages(userId) {
+  if (!S.uid || String(S.uid) !== String(userId)) return
+  if (!S.newestId) return
 
   try {
-    const data  = await API.apiGetMessages(State.currentUserId, 30, State.oldestMessageId)
-    const older = data.messages || []
-    if (!older.length) return
+    const data    = await API.apiGetMessages(userId, 20, null, S.newestId)
+    const newMsgs = (data.messages || data || []).filter(m => m.id > S.newestId)
 
-    State.messages        = [...older, ...State.messages]
-    State.oldestMessageId = older[0].id
-    renderMessagesFeed(false)
+    if (!newMsgs.length) return
 
-    if (feed) feed.scrollTop = feed.scrollHeight - prevHeight
+    // Mettre à jour newestId + mémoriser comme lu
+    S.newestId = Math.max(...newMsgs.map(m => m.id))
+    setLastRead(userId, S.newestId)
+
+    // Injecter dans le feed sans re-render
+    _appendMessages(newMsgs)
+
+    // Remonter la conv en tête
+    if (S.convs.length) {
+      const last = newMsgs[newMsgs.length - 1]
+      const idx  = S.convs.findIndex(c => String(c.user_id) === String(userId))
+      if (idx !== -1) {
+        S.convs[idx].last_message    = last.message_text || ''
+        S.convs[idx].last_activity   = last.created_at
+        S.convs[idx].last_message_id = last.id
+        S.convs[idx].unread_count    = 0 // on est en train de lire
+      }
+      _bumpConv(userId)
+    }
+
+    // Auto-scroll si on était en bas
+    if (S._atBottom) _scrollFeed('bottom')
+
+    API.apiMarkRead(userId).catch(() => {})
+
+  } catch { /* silencieux */ }
+}
+
+function _appendMessages(msgs) {
+  const feed = $('messages-feed')
+  if (!feed) return
+  msgs.forEach(msg => {
+    const div = document.createElement('div')
+    div.innerHTML = Render.renderMessage(msg, S.conv)
+    while (div.firstChild) feed.appendChild(div.firstChild)
+  })
+  S.messages.push(...msgs)
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// CHARGEMENT MESSAGES PLUS ANCIENS (scroll vers le haut)
+// ══════════════════════════════════════════════════════════════════════
+async function _loadOlder() {
+  if (S._loading || !S.uid || !S.oldestId) return
+  S._loading = true
+
+  const feed     = $('messages-feed')
+  const prevH    = feed?.scrollHeight || 0
+
+  try {
+    const data   = await API.apiGetMessages(S.uid, 30, S.oldestId)
+    const older  = data.messages || data || []
+    if (!older.length) { S._loading = false; return }
+
+    S.messages  = [...older, ...S.messages]
+    S.oldestId  = older[0].id
+
+    // Injecter en haut sans tout re-render
+    const frag = document.createDocumentFragment()
+    older.reverse().forEach(msg => {
+      const div = document.createElement('div')
+      div.innerHTML = Render.renderMessage(msg, S.conv)
+      while (div.firstChild) frag.insertBefore(div.firstChild, frag.firstChild)
+    })
+    // Re-reverser pour ordre chrono
+    const nodes = [...frag.childNodes].reverse()
+    nodes.forEach(n => feed.insertBefore(n, feed.firstChild))
+
+    // Maintenir la position de scroll
+    if (feed) feed.scrollTop = feed.scrollHeight - prevH
   } catch (e) {
     Render.toast('Erreur chargement anciens messages', 'error')
   } finally {
-    State.loadingMessages = false
+    S._loading = false
   }
 }
 
-function renderMessagesFeed(scrollToBottom = true) {
-  const feed = $('messages-feed')
-  if (!feed) return
-
-  const groups = {}
-  for (const msg of State.messages) {
-    const date = msg.created_at?.slice(0, 10) || 'unknown'
-    if (!groups[date]) groups[date] = []
-    groups[date].push(msg)
-  }
-
-  let html = ''
-  for (const [date, msgs] of Object.entries(groups)) {
-    html += Render.renderDateSep(date)
-    html += msgs.map(m => Render.renderMessage(m, State.currentConv)).join('')
-  }
-  html += '<div style="height:8px;"></div>'
-
-  feed.innerHTML = html
-  if (scrollToBottom) feed.scrollTop = feed.scrollHeight
-
-  feed.onscroll = () => {
-    if (feed.scrollTop < 60) loadOlderMessages()
-  }
-}
-
-// ── Polling nouveaux messages (toutes les 5s) ─────────────────────────
-
-function startPolling() {
-  stopPolling()
-  State.pollingTimer = setInterval(pollNewMessages, 5000)
-}
-
-function stopPolling() {
-  if (State.pollingTimer) {
-    clearInterval(State.pollingTimer)
-    State.pollingTimer = null
-  }
-}
-
-async function pollNewMessages() {
-  if (!State.currentUserId || !State.newestMessageId) return
-  try {
-    const data    = await API.apiGetMessages(State.currentUserId, 20, null, State.newestMessageId)
-    const newMsgs = data.messages || []
-    if (!newMsgs.length) return
-
-    State.messages        = [...State.messages, ...newMsgs]
-    State.newestMessageId = newMsgs[newMsgs.length - 1].id
-
-    const feed = $('messages-feed')
-    if (!feed) return
-    const atBottom = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 80
-
-    const spacer = feed.lastElementChild
-    for (const msg of newMsgs) {
-      const tmp = document.createElement('div')
-      tmp.innerHTML = Render.renderMessage(msg, State.currentConv)
-      feed.insertBefore(tmp.firstElementChild, spacer)
-    }
-    if (atBottom) feed.scrollTop = feed.scrollHeight
-
-    loadConversations()
-  } catch (e) {
-    // Silencieux
-  }
-}
-
-// ════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════
 // ENVOI MESSAGE
-// Logique :
-//   1. Un seul fichier à la fois — si un upload est en cours on bloque.
-//   2. Le message_type est déduit du mime_type du fichier, pas du tout "text".
-//   3. Si l'API retourne une erreur, on affiche un bandeau rouge sous le
-//      message optimiste, et on le retire de State.messages.
-// ════════════════════════════════════════════════════════════════════════
-
+// ══════════════════════════════════════════════════════════════════════
 async function sendMessage() {
-  if (State.sending || !State.currentUserId) return
-
-  // Bloquer l'envoi si l'upload est en cours mais pas encore terminé
-  if (State.uploadFile && !State.uploadResult) {
-    Render.toast('Fichier en cours d\'envoi, veuillez patienter…', 'info')
+  if (S.sending || !S.uid) return
+  if (S.uploadFile && !S.uploadResult) {
+    Render.toast('Fichier en cours d\'upload, patientez…', 'info')
     return
   }
 
-  const input = $('compose-input')
-  const text  = input?.value.trim() || ''
+  const inp  = $('compose-input')
+  const text = inp?.value.trim() || ''
+  if (!text && !S.uploadResult) return
 
-  if (!text && !State.uploadResult) return
+  S.sending = true
+  const btn = $('send-btn')
+  if (btn) btn.disabled = true
 
-  State.sending = true
-  const sendBtn = $('send-btn')
-  if (sendBtn) sendBtn.disabled = true
-
-  // ── Construire le payload ─────────────────────────────────────────
-  // Le message_type est toujours déduit du fichier si présent.
-  let payload = {
+  // Payload
+  const payload = {
     message_type: 'text',
     message_text: text,
   }
-
-  if (State.uploadResult) {
-    // Utiliser le type retourné par le backend lors de l'upload
-    // (qui correspond au mime_type réel du fichier)
-    payload.message_type = State.uploadResult.type   // image | video | pdf | word | excel | ...
-    payload.media_url    = State.uploadResult.url
-    if (text) payload.message_text = text
+  if (S.uploadResult) {
+    payload.message_type = S.uploadResult.type
+    payload.media_url    = S.uploadResult.url
   }
+  if (S.replyId) payload.replied_to_id = S.replyId
 
-  if (State.replyToId) {
-    payload.replied_to_id = State.replyToId
+  // Message optimiste
+  const tempId  = `opt_${Date.now()}`
+  const tempMsg = {
+    id:              tempId,
+    direction:       'outbound',
+    answered_by:     'admin',
+    message_text:    text,
+    message_type:    payload.message_type,
+    media_url:       S.uploadResult?.url || null,
+    status:          'sending',
+    created_at:      new Date().toISOString(),
+    replied_to_id:   S.replyId   || null,
+    replied_to_text: S.replyText || null,
   }
-
-  // ── Message optimiste (affiché immédiatement) ─────────────────────
-  const optimisticId = `opt_${Date.now()}`
-  const optimisticMsg = {
-    id:           optimisticId,
-    user_id:      State.currentUserId,
-    message_text: text,
-    message_type: payload.message_type,
-    media_url:    State.uploadResult?.url || null,
-    direction:    'outbound',
-    answered_by:  'admin',
-    status:       'sending',   // statut temporaire
-    created_at:   new Date().toISOString(),
-    replied_to_id:   State.replyToId   || null,
-    replied_to_text: State.replyToText || null,
-  }
-
-  State.messages.push(optimisticMsg)
-  State.newestMessageId = optimisticId   // temporaire
 
   const feed = $('messages-feed')
   if (feed) {
-    const spacer = feed.lastElementChild
-    const tmp = document.createElement('div')
-    tmp.innerHTML = Render.renderMessage(optimisticMsg, State.currentConv)
-    const node = tmp.firstElementChild
-    node.setAttribute('data-optimistic-id', optimisticId)
-    feed.insertBefore(node, spacer)
-    feed.scrollTop = feed.scrollHeight
+    const div = document.createElement('div')
+    div.innerHTML = Render.renderMessage(tempMsg, S.conv)
+    const node = div.firstElementChild
+    if (node) { node.dataset.tempId = tempId; feed.appendChild(node) }
+    _scrollFeed('bottom')
   }
 
-  // Reset textarea immédiatement (UX réactive)
-  const savedText   = text
-  const savedUpload = { ...State.uploadResult }
-  if (input) { input.value = ''; input.style.height = 'auto' }
-  const counter = $('compose-count')
-  if (counter) counter.textContent = '0 / 4096'
+  // Reset UI
+  if (inp) { inp.value = ''; inp.style.height = 'auto' }
+  const ctr = $('compose-count'); if (ctr) ctr.textContent = '0 / 4096'
+  lsDel(LS_DRAFT + S.uid)
   clearReply()
   clearUpload()
 
-  // ── Envoi réel ────────────────────────────────────────────────────
   try {
-    const msg = await API.apiSendMessage(State.currentUserId, payload)
+    const sent = await API.apiSendMessage(S.uid, payload)
 
-    // Remplacer le message optimiste par la vraie réponse du serveur
-    const idx = State.messages.findIndex(m => m.id === optimisticId)
-    if (idx !== -1) State.messages[idx] = msg
-    State.newestMessageId = msg.id
-
-    // Remplacer le nœud DOM optimiste
-    const optNode = feed?.querySelector(`[data-optimistic-id="${optimisticId}"]`)
-    if (optNode && feed) {
-      const tmp = document.createElement('div')
-      tmp.innerHTML = Render.renderMessage(msg, State.currentConv)
-      feed.replaceChild(tmp.firstElementChild, optNode)
+    // Remplacer optimiste par vrai message
+    const node = feed?.querySelector(`[data-temp-id="${tempId}"]`)
+    if (node) {
+      const div = document.createElement('div')
+      div.innerHTML = Render.renderMessage(sent, S.conv)
+      node.replaceWith(div.firstElementChild)
     }
+
+    // Mémoriser comme lu
+    if (sent.id) { S.newestId = sent.id; setLastRead(S.uid, sent.id) }
+
+    // Remonter la conv
+    const idx = S.convs.findIndex(c => String(c.user_id) === String(S.uid))
+    if (idx !== -1) {
+      S.convs[idx].last_message    = text
+      S.convs[idx].last_activity   = new Date().toISOString()
+      S.convs[idx].last_message_id = sent.id
+      S.convs[idx].unread_count    = 0
+    }
+    _bumpConv(S.uid)
 
   } catch (e) {
-    // ── Échec : marquer le message optimiste comme "error" ──────────
-    const errLabel = e?.message || 'Erreur envoi'
-
-    // Mettre à jour le statut dans le state
-    const idx = State.messages.findIndex(m => m.id === optimisticId)
-    if (idx !== -1) State.messages[idx].status = 'error'
-
-    // Mettre à jour le DOM
-    const optNode = feed?.querySelector(`[data-optimistic-id="${optimisticId}"]`)
-    if (optNode) {
-      // Ajouter une ligne d'erreur sous la bulle
-      const errDiv = document.createElement('div')
-      errDiv.style.cssText = 'font-size:11px;color:#f87171;text-align:right;margin-top:3px;padding-right:4px;'
-      errDiv.innerHTML = `⚠ Échec — ${Render.escapeHtml(errLabel)}`
-      optNode.appendChild(errDiv)
+    const node = feed?.querySelector(`[data-temp-id="${tempId}"]`)
+    if (node) {
+      const err = document.createElement('div')
+      err.style.cssText = 'font-size:11px;color:#f87171;text-align:right;padding:2px 4px;'
+      err.textContent   = '⚠ Échec — ' + (e.message || 'Erreur')
+      node.appendChild(err)
     }
-
-    Render.toast('Message non envoyé — vérifiez la connexion Telegram', 'error')
+    Render.toast('Message non envoyé', 'error')
   } finally {
-    State.sending = false
-    if (sendBtn) sendBtn.disabled = false
+    S.sending = false
+    if (btn) btn.disabled = false
   }
 }
 
-// ── Upload ────────────────────────────────────────────────────────────
-
+// ══════════════════════════════════════════════════════════════════════
+// UPLOAD
+// ══════════════════════════════════════════════════════════════════════
 function triggerUpload() {
-  // Empêcher un second upload si un fichier est déjà sélectionné
-  if (State.uploadFile) {
-    Render.toast('Un fichier est déjà en attente. Supprimez-le d\'abord.', 'info')
-    return
-  }
+  if (S.uploadFile) { Render.toast('Supprimez d\'abord le fichier en attente', 'info'); return }
   $('file-input')?.click()
 }
 
-function previewUpload(file) {
+function _previewUpload(file) {
   if (!ACCEPTED_FILES.includes(file.type)) {
-    Render.toast(`Type de fichier non supporté (${file.type})`, 'error')
-    return
+    Render.toast(`Type non supporté (${file.type})`, 'error'); return
   }
-
-  // Un seul fichier à la fois
-  if (State.uploadFile) {
-    Render.toast('Un fichier est déjà en attente. Supprimez-le d\'abord.', 'info')
-    return
-  }
-
-  State.uploadFile   = file
-  State.uploadResult = null
-  State.uploadMimeType = file.type
-
-  const preview = $('upload-preview')
-  if (preview) {
-    preview.innerHTML = Render.renderUploadPreview(file)
-    preview.style.display = 'block'
-  }
-
-  uploadFileNow(file)
+  S.uploadFile   = file
+  S.uploadResult = null
+  const prev = $('upload-preview')
+  if (prev) { prev.innerHTML = Render.renderUploadPreview(file); prev.style.display = 'block' }
+  _uploadNow(file)
 }
 
-async function uploadFileNow(file) {
-  // Indicateur de chargement dans la preview
-  const preview = $('upload-preview')
-  if (preview) {
-    const loader = preview.querySelector('.upload-loader')
-    if (!loader) {
-      const l = document.createElement('div')
-      l.className = 'upload-loader'
-      l.style.cssText = 'font-size:10px;color:#a1a1aa;margin-top:4px;'
-      l.textContent = 'Envoi en cours…'
-      preview.appendChild(l)
-    }
+async function _uploadNow(file) {
+  const prev = $('upload-preview')
+  if (prev) {
+    const l = document.createElement('div')
+    l.id = 'upload-status'
+    l.style.cssText = 'font-size:10px;color:#a1a1aa;margin-top:4px;'
+    l.textContent = 'Envoi en cours…'
+    prev.appendChild(l)
   }
-
   try {
-    const result = await API.apiUploadMedia(State.currentUserId, file)
-    State.uploadResult = result
-
-    // Retirer l'indicateur de chargement
-    if (preview) {
-      const loader = preview.querySelector('.upload-loader')
-      if (loader) loader.remove()
-      // Ajouter une confirmation visuelle
-      const ok = document.createElement('div')
-      ok.style.cssText = 'font-size:10px;color:#34d399;margin-top:4px;'
-      ok.textContent = '✓ Prêt à envoyer'
-      preview.appendChild(ok)
-    }
-  } catch (e) {
-    Render.toast('Erreur upload fichier', 'error')
+    const res = await API.apiUploadMedia(S.uid, file)
+    S.uploadResult = res
+    const st = $('upload-status')
+    if (st) { st.textContent = '✓ Prêt'; st.style.color = '#34d399' }
+  } catch {
+    Render.toast('Erreur upload', 'error')
     clearUpload()
   }
 }
 
 function clearUpload() {
-  State.uploadFile     = null
-  State.uploadResult   = null
-  State.uploadMimeType = null
-  const preview = $('upload-preview')
-  if (preview) { preview.innerHTML = ''; preview.style.display = 'none' }
-  const fi = $('file-input')
-  if (fi) fi.value = ''
+  S.uploadFile = S.uploadResult = null
+  const prev = $('upload-preview')
+  if (prev) { prev.innerHTML = ''; prev.style.display = 'none' }
+  const fi = $('file-input'); if (fi) fi.value = ''
 }
 
-// ── Reply ─────────────────────────────────────────────────────────────
-
-function setReply(messageId, text) {
-  State.replyToId   = messageId
-  State.replyToText = text
-  const preview = $('reply-preview')
-  if (preview) {
-    $('reply-text').textContent = text
-    preview.style.display = 'flex'
-  }
+// ══════════════════════════════════════════════════════════════════════
+// REPLY
+// ══════════════════════════════════════════════════════════════════════
+function setReply(msgId, text) {
+  S.replyId   = msgId
+  S.replyText = text
+  const rp = $('reply-preview')
+  if (rp) { $('reply-text').textContent = text; rp.style.display = 'flex' }
   $('compose-input')?.focus()
 }
 
 function clearReply() {
-  State.replyToId   = null
-  State.replyToText = null
-  const preview = $('reply-preview')
-  if (preview) preview.style.display = 'none'
+  S.replyId = S.replyText = null
+  const rp = $('reply-preview')
+  if (rp) rp.style.display = 'none'
 }
 
-// ── Toggle IA ─────────────────────────────────────────────────────────
-
+// ══════════════════════════════════════════════════════════════════════
+// TOGGLE IA
+// ══════════════════════════════════════════════════════════════════════
 async function toggleIA(btn) {
-  if (!State.currentUserId) return
+  if (!S.uid) return
   btn.classList.toggle('on')
-  const isOn = btn.classList.contains('on')
-  $('ia-banner').style.display = isOn ? 'flex' : 'none'
+  const on = btn.classList.contains('on')
+  const banner = $('ia-banner')
+  if (banner) banner.style.display = on ? 'flex' : 'none'
   try {
-    await API.apiSetIA(State.currentUserId, isOn)
-    if (State.currentConv) State.currentConv.ia_enabled = isOn ? 1 : 0
-  } catch (e) {
+    await API.apiSetIA(S.uid, on)
+    if (S.conv) S.conv.ia_enabled = on ? 1 : 0
+  } catch {
     btn.classList.toggle('on')
-    $('ia-banner').style.display = isOn ? 'none' : 'flex'
-    Render.toast('Erreur mise à jour IA', 'error')
+    if (banner) banner.style.display = on ? 'none' : 'flex'
+    Render.toast('Erreur IA', 'error')
   }
 }
 
-// ── Tabs conversations ────────────────────────────────────────────────
-
+// ══════════════════════════════════════════════════════════════════════
+// TABS & FILTRES
+// ══════════════════════════════════════════════════════════════════════
 async function switchConvTab(el, tab) {
-  el.closest('div').querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
+  el.closest('.tabs-wrap').querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
   el.classList.add('active')
-  State.tab = tab
+  S.tab = tab
+  lsSet(LS_TAB, tab)
   await loadConversations()
 }
 
 function filterConvs(q) {
-  State.search = q
-  clearTimeout(State._searchTimer)
-  State._searchTimer = setTimeout(() => loadConversations(), 300)
+  S.search = q
+  clearTimeout(S._searchTimer)
+  S._searchTimer = setTimeout(() => loadConversations(), 300)
 }
 
-// ── Navigation mobile ─────────────────────────────────────────────────
+function _activateTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => {
+    const matches = t.getAttribute('onclick')?.includes(`'${tab}'`)
+    t.classList.toggle('active', !!matches)
+  })
+}
 
+// ══════════════════════════════════════════════════════════════════════
+// NAVIGATION MOBILE
+// ══════════════════════════════════════════════════════════════════════
 function backToList() {
   $('conv-col')?.classList.remove('hidden-mobile')
-  $('messages-col')?.classList.remove('visible')
+  $('messages-col')?.classList.remove('visible', 'visible-mobile')
   closeProfilePanel()
-  stopPolling()
+  clearInterval(S._pollMsg)
 }
 
-window.addEventListener('resize', () => {
-  if (window.innerWidth > 700) {
-    $('conv-col')?.classList.remove('hidden-mobile')
-    $('messages-col')?.classList.remove('visible')
-  }
-  if (window.innerWidth > 1024) closeProfilePanel()
-})
-
-// ── Panneau profil ────────────────────────────────────────────────────
-
+// ══════════════════════════════════════════════════════════════════════
+// PANNEAU PROFIL
+// ══════════════════════════════════════════════════════════════════════
 function openProfilePanel() {
   $('profile-col')?.classList.add('open')
   $('profile-overlay')?.classList.add('open')
@@ -576,79 +663,151 @@ function closeProfilePanel() {
   document.body.style.overflow = ''
 }
 
-// ── Modal abonnement ──────────────────────────────────────────────────
-// ══════════════════════════════════════════════════════════════
-// DRAWERS & MODALS
-// ══════════════════════════════════════════════════════════════
-function openModal(id)  { document.getElementById(id)?.classList.add('open') }
-function closeModal(id) { document.getElementById(id)?.classList.remove('open') }  
+// ══════════════════════════════════════════════════════════════════════
+// ABONNEMENT
+// ══════════════════════════════════════════════════════════════════════
 function openSubscriptionModal() {
-  openModal('modal-subscription')
+  const nameEl = $('sub-modal-name')
+  if (nameEl) nameEl.textContent = S.conv?.name || '—'
+  window.openModal?.('modal-subscription')
 }
 
 async function createSubscription() {
-  const select = document.querySelector('#modal-subscription select')
-  const note   = document.querySelector('#modal-subscription textarea')
-  const plan   = select?.value
-  if (!plan || !State.currentUserId) return
-
+  const plan = document.querySelector('#modal-subscription select')?.value
+  const note = document.querySelector('#modal-subscription textarea')?.value || ''
+  if (!plan || !S.uid) return
   try {
-    await API.apiCreateSubscription(State.currentUserId, plan, note?.value || '')
-    Render.toast('Abonnement créé', 'success')
-    closeModal('modal-subscription')
-    const profile = await API.apiGetProfile(State.currentUserId)
-    State.currentProfile = profile
-    updateProfilePanel(profile)
+    await API.apiCreateSubscription(S.uid, plan, note)
+    Render.toast('Abonnement créé ✓', 'success')
+    window.closeModal?.('modal-subscription')
+    const profile = await API.apiGetProfile(S.uid)
+    S.profile = profile
+    _renderProfile(profile)
   } catch (e) {
-    Render.toast('Erreur création abonnement', 'error')
+    Render.toast('Erreur : ' + e.message, 'error')
   }
 }
 
-// ── Export conversation ───────────────────────────────────────────────
-async function markTestimonial(messageId, value) {
+// ══════════════════════════════════════════════════════════════════════
+// TÉMOIGNAGE / ADMIN FLAG
+// ══════════════════════════════════════════════════════════════════════
+async function markTestimonial(msgId, value) {
   try {
-    await API.apiMarkTestimonial(messageId, value)
-    const msg = State.messages.find(m => m.id === messageId)
-    if (msg) msg.is_testimonial = value
-    renderMessagesFeed(false)
-    Render.toast(value ? '⭐ Témoignage marqué' : 'Témoignage retiré', 'success')
-  } catch (e) {
-    Render.toast('Erreur mise à jour témoignage', 'error')
-  }
+    await API.apiMarkTestimonial(msgId, value)
+    const msg = S.messages.find(m => m.id === msgId)
+    if (msg) { msg.is_testimonial = value; _renderFeed() }
+    Render.toast(value ? '⭐ Marqué' : 'Retiré', 'success')
+  } catch { Render.toast('Erreur', 'error') }
 }
 
-async function markRequiresAdmin(messageId, value) {
+async function markRequiresAdmin(msgId, value) {
   try {
-    await API.apiMarkRequiresAdmin(messageId, value)
-    const msg = State.messages.find(m => m.id === messageId)
-    if (msg) msg.requires_admin = value
-    renderMessagesFeed(false)
-    Render.toast(value ? '⚡ Marqué pour admin' : 'Marquage retiré', 'success')
-  } catch (e) {
-    Render.toast('Erreur mise à jour', 'error')
-  }
+    await API.apiMarkRequiresAdmin(msgId, value)
+    const msg = S.messages.find(m => m.id === msgId)
+    if (msg) { msg.requires_admin = value; _renderFeed() }
+    Render.toast(value ? '⚡ Marqué pour admin' : 'Retiré', 'success')
+  } catch { Render.toast('Erreur', 'error') }
 }
+
+// ══════════════════════════════════════════════════════════════════════
+// EXPORT
+// ══════════════════════════════════════════════════════════════════════
 function exportConv(fmt = 'json') {
-  if (!State.currentUserId) return
-  const url = API.apiExportConversation(State.currentUserId, fmt)
-  window.open(url, '_blank')
+  if (!S.uid) return
+  window.open(API.apiExportConversation(S.uid, fmt), '_blank')
 }
 
-// ── Keyboard ──────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════
+// UI HELPERS
+// ══════════════════════════════════════════════════════════════════════
+function _updateHeader(conv, profile) {
+  const name   = profile?.name || conv?.name || 'Conversation'
+  const handle = profile ? `${profile.name} · ID ${conv.user_id}` : (conv?.name || '')
 
-function handleKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() }
+  const av = $('chat-av')
+  if (av) {
+    av.className   = `av av-md ${Render.avatarClass(name)}`
+    av.textContent = Render.avatarText(name)
+  }
+  const n = $('chat-name');    if (n) n.textContent = name
+  const h = $('chat-handle');  if (h) h.textContent = handle
+
+  const blocked = conv?.is_blocked
+  const ia      = !blocked && conv?.ia_enabled
+
+  const bb = $('blocked-banner'); if (bb) bb.style.display = blocked ? 'flex' : 'none'
+  const ib = $('ia-banner');      if (ib) ib.style.display = ia     ? 'flex' : 'none'
+
+  const tog = $('ia-toggle')
+  if (tog) tog.className = 'toggle' + (ia ? ' on' : '')
+}
+
+function _showCompose() {
+  const area = $('compose-area')
+  if (!area) return
+  area.style.display = S.conv?.is_blocked ? 'none' : 'block'
+}
+
+function _renderFeed() {
+  const feed = $('messages-feed')
+  if (!feed) return
+
+  const parts  = []
+  let lastDate = null
+
+  S.messages.forEach(msg => {
+    const d = msg.created_at ? msg.created_at.slice(0, 10) : null
+    if (d && d !== lastDate) { parts.push(Render.renderDateSep(d)); lastDate = d }
+    parts.push(Render.renderMessage(msg, S.conv))
+  })
+
+  feed.innerHTML = parts.join('') + '<div style="height:8px"></div>'
+
+  // Scroll listener pour charger les anciens
+  feed.onscroll = () => {
+    S._atBottom = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 80
+    if (feed.scrollTop < 60) _loadOlder()
+    if (S.uid) lsSet(LS_SCROLL + S.uid, feed.scrollTop)
+  }
+}
+
+function _renderProfile(profile) {
+  const col = $('profile-col')
+  if (!col) return
+  col.innerHTML = profile
+    ? `<div class="profile-handle"><span></span></div>${Render.renderProfile(profile)}`
+    : '<div class="profile-empty">Sélectionnez une conversation</div>'
+}
+
+function _showLoader() {
+  const feed = $('messages-feed')
+  if (feed) feed.innerHTML = '<div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>'
+}
+
+function _scrollFeed(target) {
+  const feed = $('messages-feed')
+  if (!feed) return
+  requestAnimationFrame(() => {
+    feed.scrollTop = target === 'bottom' ? feed.scrollHeight : (target || 0)
+  })
+}
+
+function _empty(msg) {
+  return `<div style="padding:32px;text-align:center;color:var(--txt-5);font-size:12px;">${msg}</div>`
 }
 
 function autoResize(el) {
   el.style.height = 'auto'
   el.style.height = Math.min(el.scrollHeight, 120) + 'px'
-  const c = $('compose-count')
-  if (c) c.textContent = `${el.value.length} / 4096`
 }
 
-// ── Expose window.App ─────────────────────────────────────────────────
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() }
+}
 
+// ══════════════════════════════════════════════════════════════════════
+// API PUBLIQUE window.App
+// ══════════════════════════════════════════════════════════════════════
 window.App = {
   init,
   selectConv,
@@ -672,15 +831,7 @@ window.App = {
   markRequiresAdmin,
 }
 
-// ── Boot ──────────────────────────────────────────────────────────────
-
-document.addEventListener('DOMContentLoaded', () => {
-  App.init()
-
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeProfilePanel()
-  })
-
-  const feed = $('messages-feed')
-  if (feed) feed.scrollTop = feed.scrollHeight
-})
+// ══════════════════════════════════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => { App.init() })
