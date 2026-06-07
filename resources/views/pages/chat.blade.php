@@ -4,616 +4,1335 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TradingBot — Chat direct</title>
-
-<!-- Tailwind CDN uniquement -->
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        fontFamily: { sans: ['Geist', 'sans-serif'], mono: ['Geist Mono', 'monospace'] },
-        colors: {
-          zinc: { 950: '#09090b' },
-        },
-        keyframes: {
-          fadein:  { from: { opacity: '0', transform: 'translateY(4px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
-          pulse3:  { '0%,100%': { opacity: '.3', transform: 'scale(.8)' }, '50%': { opacity: '1', transform: 'scale(1)' } },
-          slideIn: { from: { transform: 'translateX(-100%)' }, to: { transform: 'translateX(0)' } },
-        },
-        animation: {
-          fadein:  'fadein .18s ease',
-          pulse3:  'pulse3 1.2s ease infinite',
-          slideIn: 'slideIn .25s ease',
-        }
-      }
-    }
-  }
-</script>
 <link rel="preconnect" href="https://fonts.bunny.net">
 <link href="https://fonts.bunny.net/css?family=geist:300,400,500,600&family=geist-mono:400" rel="stylesheet">
-
-<!-- Minimal : uniquement ce que Tailwind ne peut pas faire -->
 <style>
-  html, body { height: 100dvh; overflow: hidden; background: #0c0c0e; color: #e4e4e7; font-family: 'Geist', sans-serif; }
 
-  /* Toggle switch */
-  .toggle { position: relative; width: 30px; height: 17px; border-radius: 99px; background: rgba(255,255,255,.1); border: none; cursor: pointer; transition: background .2s; flex-shrink: 0; }
-  .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 13px; height: 13px; border-radius: 50%; background: #71717a; transition: all .2s; }
-  .toggle.on { background: rgba(45,212,191,.25); }
-  .toggle.on::after { left: 15px; background: #2dd4bf; }
+/* ════════════════════════════════════════════════════════
+   RESET & BASE
+   ════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  /* Textarea auto-resize */
-  textarea { field-sizing: content; }
+:root {
+  --bg:         #0c0c0e;
+  --bg-1:       #0f0f11;
+  --bg-2:       #141416;
+  --bg-sidebar: #0d0d0f;
+  --border:     rgba(255,255,255,.06);
+  --hover:      rgba(255,255,255,.04);
+  --amber:      #f59e0b;
+  --amber-bg:   rgba(245,158,11,.12);
+  --amber-bd:   rgba(245,158,11,.28);
+  --sky:        #38bdf8;
+  --green:      #34d399;
+  --red:        #f87171;
+  --teal:       #2dd4bf;
+  --violet:     #a78bfa;
+  --txt:        #e4e4e7;
+  --txt-2:      #a1a1aa;
+  --txt-3:      #71717a;
+  --txt-4:      #52525b;
+  --txt-5:      #3f3f46;
+  --sidebar-w:  200px;
+  --conv-w:     280px;
+  --topbar-h:   52px;
+  --radius:     8px;
+}
 
-  /* Date séparateur */
-  .date-sep { display: flex; align-items: center; gap: 10px; margin: 12px 0; }
-  .date-sep::before, .date-sep::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.06); }
+html, body {
+  height: 100dvh;
+  overflow: hidden;
+  font-family: 'Geist', sans-serif;
+  font-size: 13px;
+  background: var(--bg);
+  color: var(--txt);
+  -webkit-font-smoothing: antialiased;
+}
 
-  /* Bulles */
-  .bubble-in    { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.06); border-bottom-left-radius: 4px; }
-  .bubble-admin { background: rgba(245,158,11,.10); border: 1px solid rgba(245,158,11,.20); border-bottom-right-radius: 4px; }
-  .bubble-ia    { background: rgba(45,212,191,.07); border: 1px solid rgba(45,212,191,.15); border-bottom-left-radius: 4px; }
+button { font-family: inherit; cursor: pointer; }
+a      { text-decoration: none; }
+input, textarea, select { font-family: inherit; }
 
-  /* Reply quote */
-  .reply-quote { border-left: 2px solid #f59e0b; background: rgba(255,255,255,.04); border-radius: 0 6px 6px 0; }
+::-webkit-scrollbar       { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 99px; }
 
-  /* Reply btn — visible au hover */
-  .reply-btn { opacity: 0; transition: opacity .15s; }
-  .msg-group:hover .reply-btn { opacity: 1; }
+/* ════════════════════════════════════════════════════════
+   LAYOUT RACINE : sidebar + main côte à côte
+   ════════════════════════════════════════════════════════ */
+#app {
+  display: flex;
+  height: 100dvh;
+  overflow: hidden;
+}
 
-  /* Dots loader */
-  .dot1 { animation: pulse3 1.2s ease infinite; }
-  .dot2 { animation: pulse3 1.2s ease .15s infinite; }
-  .dot3 { animation: pulse3 1.2s ease .3s infinite; }
+/* ════════════════════════════════════════════════════════
+   SIDEBAR
+   ════════════════════════════════════════════════════════ */
+#sidebar {
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
+  height: 100%;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
+  /* desktop : toujours visible */
+  transform: translateX(0);
+  transition: transform .25s ease;
+  z-index: 200;
+}
 
-  /* Scrollbar discrète */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.08); border-radius: 99px; }
+/* Sur mobile la sidebar passe en overlay */
+#sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  z-index: 199;
+}
 
-  /* Compose textarea */
-  #compose-input { min-height: 38px; max-height: 120px; resize: none; outline: none; line-height: 1.5; }
-  #compose-input:focus { border-color: rgba(245,158,11,.35) !important; }
+.sb-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
 
-  /* Focus input */
-  .inp:focus { border-color: rgba(245,158,11,.4) !important; outline: none; }
+.sb-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sb-logo-icon {
+  width: 24px; height: 24px;
+  background: rgba(245,158,11,.12);
+  border: 1px solid rgba(245,158,11,.28);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+}
+
+.sb-logo-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: #f4f4f5;
+}
+
+#sidebar-close {
+  display: none; /* visible uniquement mobile */
+  align-items: center; justify-content: center;
+  width: 26px; height: 26px;
+  border-radius: 6px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid var(--border);
+  color: var(--txt-3);
+  font-size: 12px;
+  transition: all .15s;
+}
+#sidebar-close:hover { color: var(--txt); background: rgba(255,255,255,.1); }
+
+.sb-nav {
+  flex: 1;
+  padding: 8px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.sb-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--txt-5);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 10px 10px 4px;
+}
+
+.sb-link {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 10px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  color: var(--txt-4);
+  transition: all .15s;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+}
+.sb-link:hover  { color: #d4d4d8; background: var(--hover); }
+.sb-link.active { color: #f4f4f5;  background: rgba(255,255,255,.07); }
+.sb-link svg    { width: 14px; height: 14px; flex-shrink: 0; stroke: currentColor; fill: none; }
+
+.sb-badge {
+  margin-left: auto;
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: rgba(56,189,248,.12);
+  color: var(--sky);
+}
+
+.sb-foot {
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.sb-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sb-av {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.07);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 600;
+  color: var(--txt-4);
+  flex-shrink: 0;
+}
+
+/* ════════════════════════════════════════════════════════
+   MAIN : topbar + chat-root
+   ════════════════════════════════════════════════════════ */
+#main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Topbar ──────────────────────────────────────────── */
+#topbar {
+  flex-shrink: 0;
+  height: var(--topbar-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+#hamburger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px; height: 30px;
+  flex-shrink: 0;
+  border-radius: var(--radius);
+  background: rgba(255,255,255,.05);
+  border: 1px solid var(--border);
+  color: var(--txt-4);
+  transition: all .15s;
+}
+#hamburger:hover { color: var(--txt); background: rgba(255,255,255,.1); }
+#hamburger svg   { width: 15px; height: 15px; stroke: currentColor; fill: none; }
+
+.topbar-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  white-space: nowrap;
+}
+
+.topbar-sub {
+  font-size: 12px;
+  color: var(--txt-5);
+  white-space: nowrap;
+}
+
+/* ════════════════════════════════════════════════════════
+   CHAT ROOT : conv-col | messages-col | profile-col
+   ════════════════════════════════════════════════════════ */
+#chat-root {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Colonne 1 : liste conversations ─────────────────── */
+#conv-col {
+  width: var(--conv-w);
+  min-width: var(--conv-w);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-1);
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.conv-filters {
+  flex-shrink: 0;
+  padding: 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.search-wrap {
+  position: relative;
+}
+
+.search-wrap svg {
+  position: absolute;
+  left: 9px; top: 50%;
+  transform: translateY(-50%);
+  width: 12px; height: 12px;
+  stroke: var(--txt-5); fill: none;
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: 7px 10px 7px 28px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 12px;
+  color: var(--txt);
+  outline: none;
+  transition: border-color .15s;
+}
+.search-input::placeholder { color: var(--txt-5); }
+.search-input:focus { border-color: var(--amber-bd); }
+
+.tabs-wrap {
+  display: flex;
+  gap: 2px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2px;
+  overflow-x: auto;
+}
+
+.tab {
+  flex: 1;
+  padding: 5px 6px;
+  border-radius: 6px;
+  font-size: 11px;
+  color: var(--txt-4);
+  background: none;
+  border: none;
+  white-space: nowrap;
+  transition: all .15s;
+  min-width: 0;
+}
+.tab:hover { color: var(--txt-2); }
+.tab.active { background: rgba(255,255,255,.08); color: var(--txt); }
+
+#conv-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Items conversation */
+.conv-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  margin: 2px 4px;
+  cursor: pointer;
+  transition: background .1s;
+  animation: fadein .18s ease;
+}
+.conv-item:hover  { background: var(--hover); }
+.conv-item.active { background: rgba(255,255,255,.07); }
+.conv-item.blocked { opacity: .55; }
+
+/* ── Colonne 2 : messages ────────────────────────────── */
+#messages-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.chat-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--border);
+  gap: 10px;
+  min-height: 52px;
+}
+
+.chat-header-left  { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.chat-header-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+#btn-back-conv {
+  display: none; /* visible uniquement mobile */
+  align-items: center; justify-content: center;
+  width: 28px; height: 28px; flex-shrink: 0;
+  border-radius: var(--radius);
+  background: rgba(255,255,255,.05);
+  border: 1px solid var(--border);
+  color: var(--txt-4);
+  transition: all .15s;
+}
+#btn-back-conv:hover { color: var(--txt); background: rgba(255,255,255,.1); }
+#btn-back-conv svg   { width: 13px; height: 13px; stroke: currentColor; fill: none; }
+
+.banner {
+  flex-shrink: 0;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  font-size: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.banner.show { display: flex; }
+.banner-blocked { background: rgba(248,113,113,.06); color: var(--red); }
+.banner-ia      { background: rgba(45,212,191,.05); color: var(--teal); }
+.banner svg     { width: 12px; height: 12px; stroke: currentColor; fill: none; flex-shrink: 0; }
+
+#messages-feed {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+}
+
+/* ── Zone de saisie ──────────────────────────────────── */
+#compose-area {
+  flex-shrink: 0;
+  display: none;
+  border-top: 1px solid var(--border);
+  background: var(--bg-1);
+  padding: 12px 16px;
+}
+#compose-area.show { display: block; }
+
+#reply-preview {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+#reply-preview.show { display: flex; }
+
+.reply-quote {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  color: var(--txt-4);
+  padding: 4px 8px;
+  border-left: 2px solid var(--amber);
+  background: rgba(255,255,255,.04);
+  border-radius: 0 6px 6px 0;
+}
+
+#upload-preview {
+  display: none;
+  margin-bottom: 8px;
+}
+
+.compose-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+#compose-input {
+  flex: 1;
+  min-height: 38px;
+  max-height: 120px;
+  padding: 9px 12px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--txt);
+  resize: none;
+  outline: none;
+  line-height: 1.5;
+  overflow-y: auto;
+  transition: border-color .15s;
+}
+#compose-input::placeholder { color: var(--txt-5); }
+#compose-input:focus { border-color: var(--amber-bd); }
+
+.compose-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+.compose-hint { font-size: 10px; color: var(--txt-5); }
+
+/* ── Colonne 3 : profil ──────────────────────────────── */
+#profile-col {
+  width: 260px;
+  min-width: 260px;
+  flex-shrink: 0;
+  background: var(--bg-1);
+  border-left: 1px solid var(--border);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+#profile-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 89;
+}
+
+.profile-handle {
+  display: flex;
+  justify-content: center;
+  padding: 10px 0 4px;
+  flex-shrink: 0;
+}
+
+.profile-handle span {
+  width: 32px; height: 4px;
+  border-radius: 99px;
+  background: rgba(255,255,255,.1);
+  display: block;
+}
+
+.profile-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--txt-5);
+  padding: 20px;
+  text-align: center;
+}
+
+/* Profile sections (injectées par JS) */
+.profile-section {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.profile-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--txt-5);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: 10px;
+}
+.stat-row   { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.stat-label { font-size: 11px; color: var(--txt-4); }
+.stat-val   { font-size: 11px; color: var(--txt-2); }
+.pbar       { height: 3px; background: rgba(255,255,255,.06); border-radius: 99px; margin-top: 4px; }
+.pbar-fill  { height: 100%; border-radius: 99px; }
+
+/* ════════════════════════════════════════════════════════
+   COMPOSANTS RÉUTILISABLES
+   ════════════════════════════════════════════════════════ */
+
+/* Boutons */
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px;
+  background: var(--amber-bg);
+  border: 1px solid var(--amber-bd);
+  border-radius: var(--radius);
+  color: var(--amber);
+  font-size: 12px; font-weight: 500;
+  white-space: nowrap;
+  transition: all .15s;
+}
+.btn-primary:hover { background: rgba(245,158,11,.2); border-color: rgba(245,158,11,.5); }
+.btn-primary svg   { width: 11px; height: 11px; stroke: currentColor; fill: none; flex-shrink: 0; }
+
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--txt-4);
+  font-size: 12px;
+  transition: all .15s;
+}
+.btn-ghost:hover { color: var(--txt); background: rgba(255,255,255,.08); }
+.btn-ghost svg   { width: 11px; height: 11px; stroke: currentColor; fill: none; flex-shrink: 0; }
+
+.btn-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--txt-4);
+  transition: all .15s;
+  flex-shrink: 0;
+}
+.btn-icon:hover { color: var(--txt); background: rgba(255,255,255,.09); }
+.btn-icon svg   { width: 13px; height: 13px; stroke: currentColor; fill: none; }
+
+.btn-icon-sm {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--txt-4);
+  transition: all .15s;
+  flex-shrink: 0;
+}
+.btn-icon-sm:hover { color: var(--txt); background: rgba(255,255,255,.09); }
+.btn-icon-sm svg   { width: 10px; height: 10px; stroke: currentColor; fill: none; }
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--teal);
+  font-size: 10px;
+  text-decoration: underline;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+/* Input générique */
+.inp {
+  width: 100%;
+  padding: 8px 10px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--txt);
+  font-size: 12px;
+  outline: none;
+  transition: border-color .15s;
+  font-family: inherit;
+}
+.inp::placeholder { color: var(--txt-5); }
+.inp:focus { border-color: var(--amber-bd); }
+
+/* Toggle IA */
+.toggle {
+  position: relative;
+  width: 30px; height: 17px;
+  border-radius: 99px;
+  background: rgba(255,255,255,.1);
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background .2s;
+}
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 13px; height: 13px;
+  border-radius: 50%;
+  background: var(--txt-3);
+  transition: all .2s;
+}
+.toggle.on { background: rgba(45,212,191,.25); }
+.toggle.on::after { left: 15px; background: var(--teal); }
+
+/* Avatars */
+.av {
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 600; flex-shrink: 0;
+}
+.av-sm  { width: 28px; height: 28px; font-size: 10px; }
+.av-md  { width: 32px; height: 32px; font-size: 11px; }
+.av-lg  { width: 44px; height: 44px; font-size: 15px; }
+.av-sky     { background: rgba(56,189,248,.15);  color: var(--sky); }
+.av-green   { background: rgba(52,211,153,.15);  color: var(--green); }
+.av-amber   { background: rgba(251,191,36,.15);  color: var(--amber); }
+.av-violet  { background: rgba(167,139,250,.15); color: var(--violet); }
+.av-teal    { background: rgba(45,212,191,.15);  color: var(--teal); }
+.av-coral   { background: rgba(248,113,113,.15); color: var(--red); }
+.av-default { background: rgba(255,255,255,.07); color: var(--txt-3); }
+
+/* Badges */
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 2px 6px;
+  border-radius: 5px;
+  font-size: 10px; font-weight: 500;
+}
+.badge-sky    { background: rgba(56,189,248,.12);  color: var(--sky); }
+.badge-green  { background: rgba(52,211,153,.12);  color: var(--green); }
+.badge-amber  { background: rgba(251,191,36,.12);  color: var(--amber); }
+.badge-red    { background: rgba(248,113,113,.12); color: var(--red); }
+.badge-violet { background: rgba(167,139,250,.12); color: var(--violet); }
+.badge-teal   { background: rgba(45,212,191,.12);  color: var(--teal); }
+.badge-zinc   { background: rgba(255,255,255,.07); color: var(--txt-2); }
+
+/* Chip IA */
+.ai-chip {
+  display: inline-flex; align-items: center;
+  background: rgba(45,212,191,.1);
+  border: 1px solid rgba(45,212,191,.2);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 10px; color: var(--teal);
+  margin-bottom: 3px;
+}
+
+/* Bulles messages */
+.bubble {
+  display: inline-block;
+  max-width: 78%;
+  padding: 9px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+.bubble-in {
+  background: rgba(255,255,255,.05);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 4px;
+}
+.bubble-admin {
+  background: rgba(245,158,11,.10);
+  border: 1px solid rgba(245,158,11,.20);
+  border-bottom-right-radius: 4px;
+}
+.bubble-ia {
+  background: rgba(45,212,191,.07);
+  border: 1px solid rgba(45,212,191,.15);
+  border-bottom-left-radius: 4px;
+}
+
+/* Broadcast */
+.bubble-broadcast {
+  max-width: 82%;
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 12px;
+}
+.bc-header { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; color: var(--txt-3); }
+.bc-header svg { width: 13px; height: 13px; stroke: currentColor; fill: none; }
+.bc-body   { color: var(--txt-2); line-height: 1.5; }
+.bc-footer { display: flex; align-items: center; gap: 6px; margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--border); }
+
+/* Groupe message */
+.msg-group { margin-bottom: 8px; animation: fadein .18s ease; }
+
+.msg-row   { display: flex; align-items: flex-end; gap: 8px; }
+.msg-right { justify-content: flex-end; }
+
+.msg-meta {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 10px; color: var(--txt-5);
+  margin-top: 3px; padding: 0 2px;
+}
+.msg-meta-right { justify-content: flex-end; }
+
+.status-sent { color: var(--txt-4); }
+.status-read { color: var(--sky); }
+
+.admin-banner {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 10px; color: #fb923c;
+  margin-bottom: 4px;
+}
+.admin-banner svg { width: 10px; height: 10px; stroke: #fb923c; fill: none; }
+
+/* Séparateur date */
+.date-sep {
+  display: flex; align-items: center;
+  margin: 12px 0; gap: 10px;
+}
+.date-sep::before, .date-sep::after {
+  content: ''; flex: 1; height: 1px;
+  background: var(--border);
+}
+.date-sep span {
+  font-size: 10px; color: var(--txt-5);
+  white-space: nowrap; padding: 0 4px;
+}
+
+/* Media */
+.media-doc {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 12px; color: var(--txt-2);
+  margin-bottom: 6px;
+}
+.media-doc svg { width: 13px; height: 13px; stroke: currentColor; fill: none; flex-shrink: 0; }
+.media-thumb   { margin-bottom: 6px; }
+.media-thumb img { max-width: 220px; border-radius: var(--radius); display: block; cursor: pointer; }
+
+/* Boutons reply (hover) */
+.reply-actions { display: flex; flex-direction: column; gap: 3px; }
+.reply-btn { opacity: 0; transition: opacity .15s; }
+.msg-group:hover .reply-btn { opacity: 1; }
+
+/* Dots loader */
+.dots { display: flex; align-items: center; justify-content: center; gap: 5px; padding: 32px; }
+.dot  { width: 5px; height: 5px; border-radius: 50%; background: var(--txt-5); }
+.dot:nth-child(1) { animation: dotpulse 1.2s ease 0s    infinite; }
+.dot:nth-child(2) { animation: dotpulse 1.2s ease .15s  infinite; }
+.dot:nth-child(3) { animation: dotpulse 1.2s ease .3s   infinite; }
+
+/* ════════════════════════════════════════════════════════
+   MODALS
+   ════════════════════════════════════════════════════════ */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  z-index: 300;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  width: min(480px, 100%);
+  max-height: 90dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.modal-head h2 { font-size: 13px; font-weight: 500; color: white; }
+.modal-body    { padding: 18px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+.modal-foot    { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--border); flex-shrink: 0; }
+
+.modal-label { font-size: 12px; color: var(--txt-4); margin-bottom: 7px; }
+
+.modal-tip {
+  background: rgba(45,212,191,.05);
+  border: 1px solid rgba(45,212,191,.12);
+  border-radius: var(--radius);
+  padding: 10px 13px;
+  font-size: 11px;
+  color: #5eead4;
+}
+
+.divider { height: 1px; background: var(--border); margin: 2px 0; }
+
+/* ════════════════════════════════════════════════════════
+   ANIMATIONS
+   ════════════════════════════════════════════════════════ */
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes dotpulse {
+  0%, 100% { opacity: .3; transform: scale(.8); }
+  50%       { opacity: 1;  transform: scale(1); }
+}
+
+/* ════════════════════════════════════════════════════════
+   RESPONSIVE
+   ════════════════════════════════════════════════════════ */
+
+/* Tablette ≤ 1024px : masquer la colonne profil, drawer latéral */
+@media (max-width: 1024px) {
+  #profile-col {
+    position: fixed;
+    top: 0; right: 0;
+    height: 100%;
+    width: min(300px, 90vw);
+    z-index: 90;
+    transform: translateX(100%);
+    transition: transform .25s ease;
+    border-left: 1px solid var(--border);
+  }
+  #profile-col.open { transform: translateX(0); }
+  #profile-overlay.open { display: block; }
+}
+
+/* Mobile ≤ 700px : sidebar en overlay + stack conv/messages */
+@media (max-width: 700px) {
+
+  /* Sidebar en overlay */
+  #sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 100%;
+    transform: translateX(-100%);
+  }
+  #sidebar.open { transform: translateX(0); }
+  #sidebar-overlay.open { display: block; }
+  #sidebar-close { display: flex; }
+
+  /* Topbar compact */
+  #topbar { padding: 0 12px; }
+  .topbar-sub { display: none; }
+
+  /* Col 1 : plein écran, cachée si messages actifs */
+  #conv-col {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    min-width: 0;
+    z-index: 5;
+  }
+  #conv-col.hidden-mobile { display: none; }
+
+  /* Col 2 : plein écran, cachée par défaut */
+  #messages-col {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: none;
+  }
+  #messages-col.visible-mobile { display: flex; }
+
+  /* Col 3 : bottom sheet sur mobile */
+  #profile-col {
+    top: auto; bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 80dvh;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    border-radius: 16px 16px 0 0;
+    transform: translateY(100%);
+    transition: transform .25s ease;
+  }
+  #profile-col.open { transform: translateY(0); }
+
+  /* Bouton retour visible */
+  #btn-back-conv { display: flex; }
+
+  /* Réduire messages feed padding */
+  #messages-feed { padding: 12px; }
+}
+
+/* Masquer profil < 1024 depuis le flux normal */
+@media (max-width: 1024px) {
+  /* Le profil est en position fixed donc ne prend plus de place */
+}
+
+/* Très petit ≤ 380px */
+@media (max-width: 380px) {
+  .topbar-title { font-size: 13px; }
+  #compose-input { font-size: 12px; }
+}
+
 </style>
 </head>
 
-<body class="flex h-screen overflow-hidden bg-[#0c0c0e] text-zinc-200">
+<body>
+<div id="app">
 
-<!-- ═══════════════════════════════════════════════
-     OVERLAY SIDEBAR (mobile)
-     ═══════════════════════════════════════════════ -->
-<div id="sb-overlay"
-     onclick="closeSidebar()"
-     class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[99] hidden"></div>
+  <!-- ══════════════════════════════════════════════
+       OVERLAY SIDEBAR
+       ══════════════════════════════════════════════ -->
+  <div id="sidebar-overlay" onclick="closeSidebar()"></div>
 
-<!-- ═══════════════════════════════════════════════
-     SIDEBAR PRINCIPALE
-     ═══════════════════════════════════════════════ -->
-<aside id="sidebar"
-       class="fixed md:static top-0 left-0 h-full w-[200px] z-[100]
-              bg-[#0d0d0f] border-r border-white/[0.06]
-              flex flex-col flex-shrink-0
-              -translate-x-full md:translate-x-0
-              transition-transform duration-[250ms] ease-in-out">
+  <!-- ══════════════════════════════════════════════
+       SIDEBAR
+       ══════════════════════════════════════════════ -->
+  <aside id="sidebar">
 
-  <!-- Logo + fermeture -->
-  <div class="flex items-center justify-between px-4 py-[14px] border-b border-white/[0.06] flex-shrink-0">
-    <div class="flex items-center gap-2">
-      <div class="w-6 h-6 rounded-md bg-amber-400/10 border border-amber-400/25 flex items-center justify-center text-[11px]">⚡</div>
-      <span class="text-[13px] font-medium text-zinc-50">TradingBot</span>
-    </div>
-    <!-- Bouton ✕ — visible sur mobile uniquement -->
-    <button onclick="closeSidebar()"
-            class="md:hidden flex items-center justify-center w-7 h-7 rounded-md
-                   bg-white/[0.05] border border-white/[0.08]
-                   text-zinc-500 hover:text-zinc-200 hover:bg-white/10
-                   transition-all text-xs cursor-pointer">✕</button>
-  </div>
-
-  <!-- Nav -->
-  <nav class="flex-1 p-2 flex flex-col gap-0.5 overflow-y-auto">
-
-    <p class="text-[10px] font-medium text-zinc-700 uppercase tracking-wider px-2.5 pt-2.5 pb-1">Principal</p>
-
-    <a href="/dashboard"
-       class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[13px]
-              text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.04] transition-all">
-      <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
-        <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
-      </svg>
-      Dashboard
-    </a>
-
-    <a href="/categories"
-       class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[13px]
-              text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.04] transition-all">
-      <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
-        <line x1="7" y1="7" x2="7.01" y2="7"/>
-      </svg>
-      Catégories
-    </a>
-
-    <a href="/chat"
-       class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[13px]
-              text-zinc-50 bg-white/[0.07] transition-all">
-      <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-      </svg>
-      Chat direct
-      <span id="nav-unread-badge"
-            class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-sky-400/10 text-sky-400 hidden"></span>
-    </a>
-
-    <a href="/message"
-       class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[13px]
-              text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.04] transition-all">
-      <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-        <path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4 20-7z"/>
-      </svg>
-      Broadcast
-    </a>
-
-    <p class="text-[10px] font-medium text-zinc-700 uppercase tracking-wider px-2.5 pt-3 pb-1">Trading</p>
-
-    <a href="/trade"
-       class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[13px]
-              text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.04] transition-all">
-      <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-      </svg>
-      Trade
-    </a>
-
-    <p class="text-[10px] font-medium text-zinc-700 uppercase tracking-wider px-2.5 pt-3 pb-1">Outils</p>
-
-    <a href="/form"
-       class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[13px]
-              text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.04] transition-all">
-      <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-        <polyline points="14 2 14 8 20 8"/>
-      </svg>
-      Formulaires
-    </a>
-
-    <a href="/ai"
-       class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[13px]
-              text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.04] transition-all">
-      <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-        <circle cx="12" cy="12" r="3"/>
-        <path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>
-      </svg>
-      Agent IA
-    </a>
-  </nav>
-
-  <!-- Footer -->
-  <div class="px-3 py-3 border-t border-white/[0.06] flex-shrink-0">
-    <div class="flex items-center gap-2">
-      <div class="w-6 h-6 rounded-full bg-white/[0.07] flex items-center justify-center text-[9px] font-semibold text-zinc-400">AD</div>
-      <div>
-        <p class="text-[11px] font-medium text-zinc-300">Admin</p>
-        <p class="text-[10px] text-zinc-700">fdkvip.com</p>
+    <div class="sb-head">
+      <div class="sb-logo">
+        <div class="sb-logo-icon">⚡</div>
+        <span class="sb-logo-text">TradingBot</span>
       </div>
+      <button id="sidebar-close" onclick="closeSidebar()">✕</button>
     </div>
-  </div>
-</aside>
 
-<!-- ═══════════════════════════════════════════════
-     ZONE PRINCIPALE
-     ═══════════════════════════════════════════════ -->
-<div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+    <nav class="sb-nav">
 
-  <!-- Topbar -->
-  <header class="flex-shrink-0 flex items-center justify-between
-                 px-5 h-[52px] bg-[#0f0f11]
-                 border-b border-white/[0.06] gap-3">
+      <p class="sb-label">Principal</p>
 
-    <div class="flex items-center gap-2.5 min-w-0">
-
-      <!-- ★ HAMBURGER — toujours visible, ouvre sidebar en overlay -->
-      <button id="hamburger"
-              onclick="openSidebar()"
-              aria-label="Ouvrir le menu"
-              class="flex items-center justify-center w-[30px] h-[30px] flex-shrink-0
-                     rounded-lg bg-white/[0.05] border border-white/[0.08]
-                     text-zinc-500 hover:text-zinc-200 hover:bg-white/10
-                     transition-all cursor-pointer">
-        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-          <path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/>
+      <a href="/dashboard" class="sb-link">
+        <svg viewBox="0 0 24 24" stroke-width="1.5">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
         </svg>
-      </button>
+        Dashboard
+      </a>
 
-      <h1 class="text-sm font-medium text-white whitespace-nowrap">Chat direct</h1>
-      <span class="text-zinc-800 hidden sm:inline">·</span>
-      <span class="text-xs text-zinc-700 hidden sm:inline whitespace-nowrap">Timeline unifiée</span>
-    </div>
-
-    <div class="flex items-center gap-2 flex-shrink-0">
-      <button onclick="openModal('modal-new-conv')"
-              class="flex items-center gap-1.5 px-3 py-1.5
-                     bg-amber-400/[0.12] border border-amber-400/[0.28]
-                     rounded-lg text-amber-400 text-xs font-medium
-                     hover:bg-amber-400/20 hover:border-amber-400/50
-                     transition-all cursor-pointer whitespace-nowrap">
-        <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-          <path stroke-linecap="round" d="M12 4v16m8-8H4"/>
+      <a href="/categories" class="sb-link">
+        <svg viewBox="0 0 24 24" stroke-width="1.5">
+          <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+          <line x1="7" y1="7" x2="7.01" y2="7"/>
         </svg>
-        <span class="hidden sm:inline">Nouvelle conversation</span>
-        <span class="sm:hidden">Nouveau</span>
-      </button>
-    </div>
-  </header>
+        Catégories
+      </a>
 
-  <!-- ── CHAT ROOT 3 colonnes ── -->
-  <div class="flex flex-1 overflow-hidden relative">
-
-    <!-- COL 1 — Liste conversations -->
-    <div id="conv-col"
-         class="w-[280px] flex-shrink-0 flex flex-col
-                bg-[#0f0f11] border-r border-white/[0.06]
-                overflow-hidden
-                absolute md:static inset-0 md:inset-auto z-10
-                md:flex">
-
-      <!-- Recherche + tabs -->
-      <div class="flex-shrink-0 p-2.5 border-b border-white/[0.06] flex flex-col gap-2">
-        <div class="relative">
-          <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-zinc-700"
-               fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-          </svg>
-          <input type="text"
-                 placeholder="Rechercher…"
-                 oninput="App.filterConvs(this.value)"
-                 class="inp w-full bg-white/[0.03] border border-white/[0.06] rounded-lg
-                        pl-7 pr-3 py-1.5 text-xs text-zinc-200 placeholder-zinc-700
-                        transition-all">
-        </div>
-
-        <!-- Tabs -->
-        <div class="flex items-center gap-0.5 bg-white/[0.03] border border-white/[0.05] rounded-lg p-0.5 overflow-x-auto">
-          <button class="tab active flex-1 py-1 px-1.5 rounded-md text-[11px] text-zinc-400
-                         transition-all whitespace-nowrap cursor-pointer"
-                  onclick="App.switchConvTab(this,'all')">Tous</button>
-          <button class="tab flex-1 py-1 px-1.5 rounded-md text-[11px] text-zinc-400
-                         transition-all whitespace-nowrap cursor-pointer"
-                  onclick="App.switchConvTab(this,'requires_admin')">
-            ⚡<span id="tab-admin-count" class="ml-0.5 text-orange-400"></span>
-          </button>
-          <button class="tab flex-1 py-1 px-1.5 rounded-md text-[11px] text-zinc-400
-                         transition-all whitespace-nowrap cursor-pointer"
-                  onclick="App.switchConvTab(this,'unread')">
-            Lus<span id="tab-unread-count" class="ml-0.5 text-sky-400"></span>
-          </button>
-          <button class="tab flex-1 py-1 px-1.5 rounded-md text-[11px] text-zinc-400
-                         transition-all whitespace-nowrap cursor-pointer"
-                  onclick="App.switchConvTab(this,'ia')">IA</button>
-          <button class="tab flex-1 py-1 px-1.5 rounded-md text-[11px] text-zinc-400
-                         transition-all whitespace-nowrap cursor-pointer"
-                  onclick="App.switchConvTab(this,'blocked')">🚫</button>
-        </div>
-      </div>
-
-      <!-- Liste -->
-      <div id="conv-list" class="flex-1 overflow-y-auto">
-        <div class="flex items-center justify-center gap-1.5 py-10">
-          <span class="dot1 w-1.5 h-1.5 rounded-full bg-zinc-700 inline-block"></span>
-          <span class="dot2 w-1.5 h-1.5 rounded-full bg-zinc-700 inline-block"></span>
-          <span class="dot3 w-1.5 h-1.5 rounded-full bg-zinc-700 inline-block"></span>
-        </div>
-      </div>
-    </div>
-
-    <!-- COL 2 — Messages -->
-    <div id="messages-col"
-         class="flex-1 flex flex-col min-w-0 overflow-hidden
-                hidden md:flex
-                absolute md:static inset-0 md:inset-auto z-10
-                bg-[#0c0c0e]">
-
-      <!-- Chat header -->
-      <div class="flex-shrink-0 flex items-center justify-between
-                  px-4 py-2.5 bg-[#0f0f11]
-                  border-b border-white/[0.06] gap-2.5 flex-wrap">
-        <div class="flex items-center gap-2.5 min-w-0">
-
-          <!-- Bouton retour (mobile uniquement) -->
-          <button id="btn-back-conv"
-                  onclick="App.backToList()"
-                  class="md:hidden flex items-center justify-center w-7 h-7 flex-shrink-0
-                         rounded-lg bg-white/[0.05] border border-white/[0.08]
-                         text-zinc-500 hover:text-zinc-200 transition-all cursor-pointer">
-            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" d="m15 18-6-6 6-6"/>
-            </svg>
-          </button>
-
-          <div id="chat-av"
-               class="w-8 h-8 rounded-full bg-white/[0.07] flex items-center justify-center
-                      text-[11px] font-semibold text-zinc-400 flex-shrink-0">—</div>
-          <div class="min-w-0">
-            <p class="text-[13px] font-medium text-white truncate" id="chat-name">Sélectionner une conversation</p>
-            <p class="text-[11px] text-zinc-600 truncate" id="chat-handle"></p>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-2 flex-shrink-0">
-          <div class="flex items-center gap-1.5">
-            <span class="text-[11px] text-zinc-600 hidden sm:inline">Agent IA</span>
-            <button class="toggle" id="ia-toggle" onclick="App.toggleIA(this)"></button>
-          </div>
-          <div class="w-px h-4 bg-white/[0.08]"></div>
-          <button onclick="App.openProfilePanel()"
-                  class="flex items-center justify-center w-7 h-7 rounded-lg
-                         bg-white/[0.04] border border-white/[0.06]
-                         text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.08]
-                         transition-all cursor-pointer">
-            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-            </svg>
-          </button>
-          <button onclick="openModal('modal-actions')"
-                  class="flex items-center justify-center w-7 h-7 rounded-lg
-                         bg-white/[0.04] border border-white/[0.06]
-                         text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.08]
-                         transition-all cursor-pointer">
-            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-              <circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <!-- Bannière bloqué -->
-      <div id="blocked-banner"
-           class="hidden flex-shrink-0 items-center gap-2
-                  px-4 py-2 text-xs text-red-400
-                  bg-red-400/[0.06] border-b border-white/[0.06]">
-        <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-          <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+      <a href="/chat" class="sb-link active">
+        <svg viewBox="0 0 24 24" stroke-width="1.5">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
         </svg>
-        Ce membre a <strong class="font-medium">bloqué le bot</strong> — les messages ne peuvent plus lui être envoyés.
-      </div>
+        Chat direct
+        <span id="nav-unread-badge" class="sb-badge" style="display:none;"></span>
+      </a>
 
-      <!-- Bannière IA -->
-      <div id="ia-banner"
-           class="hidden flex-shrink-0 items-center gap-2
-                  px-4 py-2 text-xs text-teal-400
-                  bg-teal-400/[0.05] border-b border-white/[0.06]">
-        <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+      <a href="/message" class="sb-link">
+        <svg viewBox="0 0 24 24" stroke-width="1.5">
+          <path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4 20-7z"/>
+        </svg>
+        Broadcast
+      </a>
+
+      <p class="sb-label">Trading</p>
+
+      <a href="/trade" class="sb-link">
+        <svg viewBox="0 0 24 24" stroke-width="1.5">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+        </svg>
+        Trade
+      </a>
+
+      <p class="sb-label">Outils</p>
+
+      <a href="/form" class="sb-link">
+        <svg viewBox="0 0 24 24" stroke-width="1.5">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+        Formulaires
+      </a>
+
+      <a href="/ai" class="sb-link">
+        <svg viewBox="0 0 24 24" stroke-width="1.5">
           <circle cx="12" cy="12" r="3"/>
           <path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>
         </svg>
-        <span>L'Agent IA gère cette conversation.</span>
-        <button onclick="App.toggleIA(document.getElementById('ia-toggle'))"
-                class="ml-auto text-[10px] underline text-teal-300 cursor-pointer bg-transparent border-none">
-          Reprendre manuellement
+        Agent IA
+      </a>
+
+    </nav>
+
+    <div class="sb-foot">
+      <div class="sb-user">
+        <div class="sb-av">AD</div>
+        <div>
+          <p style="font-size:11px;font-weight:500;color:#d4d4d8;">Admin</p>
+          <p style="font-size:10px;color:var(--txt-5);">fdkvip.com</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══════════════════════════════════════════════
+       MAIN
+       ══════════════════════════════════════════════ -->
+  <div id="main">
+
+    <!-- Topbar -->
+    <div id="topbar">
+      <div class="topbar-left">
+        <!-- Hamburger — toujours visible -->
+        <button id="hamburger" onclick="openSidebar()">
+          <svg viewBox="0 0 24 24" stroke-width="1.5">
+            <path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+        <span class="topbar-title">Chat direct</span>
+        <span class="topbar-sub">· Timeline unifiée</span>
+      </div>
+      <div>
+        <button class="btn-primary" onclick="openModal('modal-new-conv')">
+          <svg viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" d="M12 4v16m8-8H4"/></svg>
+          <span class="hide-xs">Nouvelle conversation</span>
+          <span class="show-xs" style="display:none;">Nouveau</span>
         </button>
       </div>
-
-      <!-- Fil messages -->
-      <div id="messages-feed"
-           class="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-0">
-        <div class="flex items-center justify-center gap-1.5 m-auto py-10">
-          <span class="dot1 w-1.5 h-1.5 rounded-full bg-zinc-700 inline-block"></span>
-          <span class="dot2 w-1.5 h-1.5 rounded-full bg-zinc-700 inline-block"></span>
-          <span class="dot3 w-1.5 h-1.5 rounded-full bg-zinc-700 inline-block"></span>
-        </div>
-      </div>
-
-      <!-- Zone de saisie -->
-      <div id="compose-area"
-           class="hidden flex-shrink-0
-                  border-t border-white/[0.06]
-                  bg-[#0f0f11] px-4 py-3">
-
-        <!-- Reply preview -->
-        <div id="reply-preview" class="hidden items-center gap-2 mb-2">
-          <div class="reply-quote flex-1 overflow-hidden text-ellipsis whitespace-nowrap
-                      px-2 py-1 text-[11px] text-zinc-500" id="reply-text">—</div>
-          <button onclick="App.clearReply()"
-                  class="flex items-center justify-center w-5 h-5 flex-shrink-0
-                         rounded-md bg-white/[0.04] border border-white/[0.06]
-                         text-zinc-500 hover:text-zinc-200 transition-all cursor-pointer">
-            <svg width="9" height="9" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-              <path stroke-linecap="round" d="M18 6 6 18M6 6l12 12"/>
-            </svg>
-          </button>
-        </div>
-
-        <!-- Upload preview -->
-        <div id="upload-preview" class="hidden mb-2"></div>
-
-        <div class="flex items-end gap-2">
-          <button onclick="App.triggerUpload()"
-                  class="flex items-center justify-center w-7 h-7 mb-0.5 flex-shrink-0
-                         rounded-lg bg-white/[0.04] border border-white/[0.06]
-                         text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.08]
-                         transition-all cursor-pointer">
-            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-              <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
-            </svg>
-          </button>
-          <input type="file" id="file-input" class="hidden">
-          <textarea id="compose-input"
-                    placeholder="Sélectionner une conversation…"
-                    rows="1"
-                    onkeydown="App.handleKey(event)"
-                    oninput="App.autoResize(this)"
-                    class="flex-1 bg-white/[0.04] border border-white/[0.06] rounded-xl
-                           px-3 py-2 text-[13px] text-zinc-200 placeholder-zinc-700
-                           font-sans transition-all"></textarea>
-          <button onclick="App.sendMessage()"
-                  class="flex items-center gap-1.5 px-3 py-1.5 mb-0.5 flex-shrink-0
-                         bg-amber-400/[0.12] border border-amber-400/[0.28]
-                         rounded-lg text-amber-400 text-xs font-medium
-                         hover:bg-amber-400/20 hover:border-amber-400/50
-                         transition-all cursor-pointer">
-            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="m22 2-7 20-4-9-9-4 20-7z"/>
-            </svg>
-            <span class="hidden sm:inline">Envoyer</span>
-          </button>
-        </div>
-
-        <div class="flex items-center justify-between mt-1.5">
-          <span class="text-[10px] text-zinc-800">Enter · Shift+Enter saut de ligne</span>
-          <span class="text-[10px] text-zinc-800" id="compose-count">0 / 4096</span>
-        </div>
-      </div>
-    </div><!-- /messages-col -->
-
-    <!-- COL 3 — Profil (drawer tablet / bottom sheet mobile) -->
-    <div id="profile-col"
-         class="fixed md:static top-0 right-0 h-full
-                w-[min(320px,90vw)] md:w-[260px]
-                bg-[#0f0f11] border-l border-white/[0.06]
-                flex-shrink-0 overflow-y-auto
-                translate-x-full md:translate-x-0
-                transition-transform duration-[250ms] ease-in-out
-                z-[90]">
-      <div class="flex justify-center pt-2.5 pb-1">
-        <div class="w-8 h-1 rounded-full bg-white/10"></div>
-      </div>
-      <div class="text-center text-[12px] text-zinc-700 py-10 px-4">
-        Sélectionnez une conversation
-      </div>
     </div>
 
-    <!-- Overlay profil -->
-    <div id="profile-overlay"
-         onclick="App.closeProfilePanel()"
-         class="fixed inset-0 bg-black/40 z-[89] hidden md:hidden"></div>
+    <!-- Chat root -->
+    <div id="chat-root">
 
-  </div><!-- /chat-root -->
-</div><!-- /zone principale -->
+      <!-- COL 1 — Conversations -->
+      <div id="conv-col">
+
+        <div class="conv-filters">
+          <div class="search-wrap">
+            <svg viewBox="0 0 24 24" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            </svg>
+            <input class="search-input"
+                   type="text"
+                   placeholder="Rechercher…"
+                   oninput="App.filterConvs(this.value)">
+          </div>
+
+          <div class="tabs-wrap">
+            <button class="tab active" onclick="App.switchConvTab(this,'all')">Tous</button>
+            <button class="tab" onclick="App.switchConvTab(this,'requires_admin')">
+              ⚡ <span id="tab-admin-count" style="color:#fb923c;"></span>
+            </button>
+            <button class="tab" onclick="App.switchConvTab(this,'unread')">
+              Non lus <span id="tab-unread-count" style="color:var(--sky);"></span>
+            </button>
+            <button class="tab" onclick="App.switchConvTab(this,'ia')">IA</button>
+            <button class="tab" onclick="App.switchConvTab(this,'blocked')">Bloqués</button>
+          </div>
+        </div>
+
+        <div id="conv-list">
+          <div class="dots">
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COL 2 — Messages -->
+      <div id="messages-col">
+
+        <!-- Header -->
+        <div class="chat-header">
+          <div class="chat-header-left">
+            <button id="btn-back-conv" onclick="App.backToList()">
+              <svg viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" d="m15 18-6-6 6-6"/>
+              </svg>
+            </button>
+            <div id="chat-av" class="av av-md av-default">—</div>
+            <div style="min-width:0;">
+              <p id="chat-name" style="font-size:13px;font-weight:500;color:white;
+                 overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                Sélectionner une conversation
+              </p>
+              <p id="chat-handle" style="font-size:11px;color:var(--txt-4);
+                 overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></p>
+            </div>
+          </div>
+
+          <div class="chat-header-right">
+            <span style="font-size:11px;color:var(--txt-4);" class="hide-sm">Agent IA</span>
+            <button class="toggle" id="ia-toggle" onclick="App.toggleIA(this)"></button>
+            <div style="width:1px;height:16px;background:var(--border);"></div>
+            <button class="btn-icon" onclick="App.openProfilePanel()" title="Profil">
+              <svg viewBox="0 0 24 24" stroke-width="1.5">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </button>
+            <button class="btn-icon" onclick="openModal('modal-actions')" title="Actions">
+              <svg viewBox="0 0 24 24" stroke-width="1.5">
+                <circle cx="12" cy="5" r="1"/>
+                <circle cx="12" cy="12" r="1"/>
+                <circle cx="12" cy="19" r="1"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Bannière bloqué -->
+        <div id="blocked-banner" class="banner banner-blocked">
+          <svg viewBox="0 0 24 24" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+          </svg>
+          Ce membre a <strong style="margin:0 3px;">bloqué le bot</strong> — les messages ne peuvent plus lui être envoyés.
+        </div>
+
+        <!-- Bannière IA -->
+        <div id="ia-banner" class="banner banner-ia">
+          <svg viewBox="0 0 24 24" stroke-width="1.5">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>
+          </svg>
+          L'Agent IA gère cette conversation.
+          <button class="btn-link" onclick="App.toggleIA(document.getElementById('ia-toggle'))">
+            Reprendre manuellement
+          </button>
+        </div>
+
+        <!-- Fil messages -->
+        <div id="messages-feed">
+          <div class="dots">
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+          </div>
+        </div>
+
+        <!-- Zone saisie -->
+        <div id="compose-area">
+
+          <div id="reply-preview">
+            <div class="reply-quote" id="reply-text">—</div>
+            <button class="btn-icon-sm" onclick="App.clearReply()">
+              <svg viewBox="0 0 24 24" stroke-width="2.5">
+                <path stroke-linecap="round" d="M18 6 6 18M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+
+          <div id="upload-preview"></div>
+
+          <div class="compose-row">
+            <button class="btn-icon" style="margin-bottom:2px;" onclick="App.triggerUpload()" title="Joindre">
+              <svg viewBox="0 0 24 24" stroke-width="1.5">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+              </svg>
+            </button>
+            <input type="file" id="file-input" style="display:none;">
+            <textarea id="compose-input"
+                      placeholder="Sélectionner une conversation…"
+                      rows="1"
+                      onkeydown="App.handleKey(event)"
+                      oninput="App.autoResize(this)"></textarea>
+            <button id="send-btn" class="btn-primary" style="margin-bottom:2px;" onclick="App.sendMessage()">
+              <svg viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m22 2-7 20-4-9-9-4 20-7z"/>
+              </svg>
+              <span id="send-label">Envoyer</span>
+            </button>
+          </div>
+
+          <div class="compose-footer">
+            <span class="compose-hint">Enter pour envoyer · Shift+Enter saut de ligne</span>
+            <span class="compose-hint" id="compose-count">0 / 4096</span>
+          </div>
+        </div>
+
+      </div><!-- /messages-col -->
+
+      <!-- COL 3 — Profil -->
+      <div id="profile-col">
+        <div class="profile-handle"><span></span></div>
+        <div class="profile-empty">Sélectionnez une conversation</div>
+      </div>
+
+      <!-- Overlay profil -->
+      <div id="profile-overlay" onclick="App.closeProfilePanel()"></div>
+
+    </div><!-- /chat-root -->
+  </div><!-- /main -->
+</div><!-- /app -->
 
 
-<!-- ═══════════════════════════════════════════════
+<!-- ══════════════════════════════════════════════
      MODALS
-     ═══════════════════════════════════════════════ -->
+     ══════════════════════════════════════════════ -->
 
-<!-- Modal Actions -->
-<div id="modal-actions"
-     onclick="if(event.target===this)closeModal('modal-actions')"
-     class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[200]
-            hidden items-center justify-center p-4">
-  <div class="bg-[#141416] border border-white/[0.06] rounded-xl w-[min(320px,calc(100vw-32px))] flex flex-col overflow-hidden">
-    <div class="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06] flex-shrink-0">
-      <p class="text-[13px] font-medium text-white">Actions</p>
-      <button onclick="closeModal('modal-actions')"
-              class="flex items-center justify-center w-7 h-7 rounded-lg
-                     bg-white/[0.04] border border-white/[0.06]
-                     text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.08]
-                     transition-all cursor-pointer">
-        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" d="M18 6 6 18M6 6l12 12"/>
-        </svg>
+<!-- Actions -->
+<div class="modal-overlay" id="modal-actions">
+  <div class="modal" style="max-width:320px;">
+    <div class="modal-head">
+      <h2>Actions</h2>
+      <button class="btn-icon" onclick="closeModal('modal-actions')">
+        <svg viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" d="M18 6 6 18M6 6l12 12"/></svg>
       </button>
     </div>
-    <div class="p-2.5 flex flex-col gap-1">
-      <button onclick="closeModal('modal-actions')"
-              class="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-[12px] text-zinc-400
-                     bg-white/[0.04] border border-white/[0.06] hover:text-zinc-200 hover:bg-white/[0.08] transition-all cursor-pointer">
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path d="m22 2-7 20-4-9-9-4 20-7z"/></svg>
+    <div style="padding:8px 10px;display:flex;flex-direction:column;gap:4px;">
+      <button class="btn-ghost" style="justify-content:flex-start;width:100%;font-size:12px;"
+              onclick="closeModal('modal-actions')">
+        <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="m22 2-7 20-4-9-9-4 20-7z"/></svg>
         Envoyer un broadcast ciblé
       </button>
-      <button onclick="closeModal('modal-actions')"
-              class="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-[12px] text-zinc-400
-                     bg-white/[0.04] border border-white/[0.06] hover:text-zinc-200 hover:bg-white/[0.08] transition-all cursor-pointer">
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/></svg>
+      <button class="btn-ghost" style="justify-content:flex-start;width:100%;font-size:12px;"
+              onclick="closeModal('modal-actions')">
+        <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/></svg>
         Ajouter à une catégorie
       </button>
-      <button onclick="App.exportConv('json');closeModal('modal-actions')"
-              class="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-[12px] text-zinc-400
-                     bg-white/[0.04] border border-white/[0.06] hover:text-zinc-200 hover:bg-white/[0.08] transition-all cursor-pointer">
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/></svg>
+      <button class="btn-ghost" style="justify-content:flex-start;width:100%;font-size:12px;"
+              onclick="App.exportConv('json');closeModal('modal-actions')">
+        <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/></svg>
         Exporter la conversation
       </button>
-      <hr class="border-white/[0.06] my-1">
-      <button onclick="closeModal('modal-actions')"
-              class="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-[12px] text-red-400
-                     bg-white/[0.04] border border-white/[0.06] hover:bg-red-400/10 transition-all cursor-pointer">
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+      <div class="divider"></div>
+      <button class="btn-ghost" style="justify-content:flex-start;width:100%;font-size:12px;color:var(--red);"
+              onclick="closeModal('modal-actions')">
+        <svg viewBox="0 0 24 24" stroke-width="1.5" style="stroke:var(--red);">
+          <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+        </svg>
         Signaler comme bloqué
       </button>
     </div>
   </div>
 </div>
 
-<!-- Modal Nouvelle conversation -->
-<div id="modal-new-conv"
-     onclick="if(event.target===this)closeModal('modal-new-conv')"
-     class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[200]
-            hidden items-center justify-center p-4">
-  <div class="bg-[#141416] border border-white/[0.06] rounded-xl w-[min(480px,calc(100vw-32px))] max-h-[90dvh] flex flex-col overflow-hidden">
-    <div class="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06] flex-shrink-0">
-      <p class="text-[13px] font-medium text-white">Nouvelle conversation</p>
-      <button onclick="closeModal('modal-new-conv')"
-              class="flex items-center justify-center w-7 h-7 rounded-lg
-                     bg-white/[0.04] border border-white/[0.06]
-                     text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.08]
-                     transition-all cursor-pointer">
-        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" d="M18 6 6 18M6 6l12 12"/>
-        </svg>
+<!-- Nouvelle conversation -->
+<div class="modal-overlay" id="modal-new-conv">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>Nouvelle conversation</h2>
+      <button class="btn-icon" onclick="closeModal('modal-new-conv')">
+        <svg viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" d="M18 6 6 18M6 6l12 12"/></svg>
       </button>
     </div>
-    <div class="p-5 flex flex-col gap-3">
+    <div class="modal-body">
       <div>
-        <p class="text-xs text-zinc-500 mb-2">Rechercher un membre</p>
-        <input type="text" placeholder="Nom, @handle ou ID Telegram…"
-               class="inp w-full bg-white/[0.04] border border-white/[0.06] rounded-lg
-                      px-3 py-2 text-xs text-zinc-200 placeholder-zinc-700 font-sans transition-all">
+        <p class="modal-label">Rechercher un membre</p>
+        <input class="inp" type="text" placeholder="Nom, @handle ou ID Telegram…">
       </div>
-      <p class="text-[10px] text-zinc-700">Les membres apparaîtront ici lors de la connexion à l'API.</p>
+      <p style="font-size:10px;color:var(--txt-5);">Les membres apparaîtront ici lors de la connexion à l'API.</p>
     </div>
-    <div class="flex items-center justify-end gap-2 px-5 py-3 border-t border-white/[0.06] flex-shrink-0">
-      <button onclick="closeModal('modal-new-conv')"
-              class="px-3 py-1.5 rounded-lg text-xs text-zinc-400
-                     bg-white/[0.04] border border-white/[0.06]
-                     hover:text-zinc-200 hover:bg-white/[0.08] transition-all cursor-pointer">Annuler</button>
-      <button onclick="closeModal('modal-new-conv')"
-              class="px-3 py-1.5 rounded-lg text-xs font-medium text-amber-400
-                     bg-amber-400/[0.12] border border-amber-400/[0.28]
-                     hover:bg-amber-400/20 transition-all cursor-pointer">Ouvrir →</button>
+    <div class="modal-foot">
+      <button class="btn-ghost" onclick="closeModal('modal-new-conv')">Annuler</button>
+      <button class="btn-primary" onclick="closeModal('modal-new-conv')">Ouvrir →</button>
     </div>
   </div>
 </div>
 
-<!-- Modal Abonnement -->
-<div id="modal-subscription"
-     onclick="if(event.target===this)closeModal('modal-subscription')"
-     class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[200]
-            hidden items-center justify-center p-4">
-  <div class="bg-[#141416] border border-white/[0.06] rounded-xl w-[min(480px,calc(100vw-32px))] max-h-[90dvh] flex flex-col overflow-hidden">
-    <div class="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06] flex-shrink-0">
+<!-- Abonnement -->
+<div class="modal-overlay" id="modal-subscription">
+  <div class="modal">
+    <div class="modal-head">
       <div>
-        <p class="text-[13px] font-medium text-white">Gérer l'abonnement</p>
-        <p class="text-[11px] text-zinc-500 mt-0.5" id="sub-modal-name">—</p>
+        <h2>Gérer l'abonnement</h2>
+        <p id="sub-modal-name" style="font-size:11px;color:var(--txt-4);margin-top:2px;">—</p>
       </div>
-      <button onclick="closeModal('modal-subscription')"
-              class="flex items-center justify-center w-7 h-7 rounded-lg
-                     bg-white/[0.04] border border-white/[0.06]
-                     text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.08]
-                     transition-all cursor-pointer">
-        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" d="M18 6 6 18M6 6l12 12"/>
-        </svg>
+      <button class="btn-icon" onclick="closeModal('modal-subscription')">
+        <svg viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" d="M18 6 6 18M6 6l12 12"/></svg>
       </button>
     </div>
-    <div class="p-5 flex flex-col gap-3.5 overflow-y-auto">
+    <div class="modal-body">
       <div>
-        <p class="text-xs text-zinc-500 mb-2">Plan</p>
-        <select class="inp w-full bg-white/[0.04] border border-white/[0.06] rounded-lg
-                       px-3 py-2 text-xs text-zinc-200 font-sans cursor-pointer">
+        <p class="modal-label">Plan</p>
+        <select class="inp" style="cursor:pointer;">
           <option value="mensuel">Mensuel — 30 jours</option>
           <option value="trimestriel">Trimestriel — 90 jours</option>
           <option value="semestriel">Semestriel — 180 jours</option>
@@ -621,96 +1340,75 @@
         </select>
       </div>
       <div>
-        <p class="text-xs text-zinc-500 mb-2">Note interne (optionnel)</p>
-        <textarea placeholder="Ex : offre spéciale avril…"
-                  class="inp w-full bg-white/[0.04] border border-white/[0.06] rounded-lg
-                         px-3 py-2 text-xs text-zinc-200 placeholder-zinc-700 font-sans
-                         min-h-[60px] resize-none"></textarea>
+        <p class="modal-label">Note interne (optionnel)</p>
+        <textarea class="inp" style="min-height:60px;resize:vertical;" placeholder="Ex : offre spéciale…"></textarea>
       </div>
-      <div class="bg-teal-400/[0.05] border border-teal-400/[0.12] rounded-lg px-3 py-2.5 text-[11px] text-teal-400">
+      <div class="modal-tip">
         Les durées s'additionnent — si un abonnement actif existe, le nouveau repart de sa date d'expiration.
       </div>
     </div>
-    <div class="flex items-center justify-end gap-2 px-5 py-3 border-t border-white/[0.06] flex-shrink-0">
-      <button onclick="closeModal('modal-subscription')"
-              class="px-3 py-1.5 rounded-lg text-xs text-zinc-400
-                     bg-white/[0.04] border border-white/[0.06]
-                     hover:text-zinc-200 hover:bg-white/[0.08] transition-all cursor-pointer">Annuler</button>
-      <button onclick="App.createSubscription()"
-              class="px-3 py-1.5 rounded-lg text-xs font-medium text-amber-400
-                     bg-amber-400/[0.12] border border-amber-400/[0.28]
-                     hover:bg-amber-400/20 transition-all cursor-pointer">Créer →</button>
+    <div class="modal-foot">
+      <button class="btn-ghost" onclick="closeModal('modal-subscription')">Annuler</button>
+      <button class="btn-primary" onclick="App.createSubscription()">Créer →</button>
     </div>
   </div>
 </div>
 
 
-<!-- ═══════════════════════════════════════════════
+<!-- ══════════════════════════════════════════════
      SCRIPTS
-     ═══════════════════════════════════════════════ -->
+     ══════════════════════════════════════════════ -->
 <script>
-/* ─── Sidebar ─────────────────────────────────────────────── */
+/* ── Sidebar ─────────────────────────────── */
 function openSidebar() {
-  document.getElementById('sidebar').classList.add('translate-x-0')
-  document.getElementById('sidebar').classList.remove('-translate-x-full')
-  document.getElementById('sb-overlay').classList.remove('hidden')
+  document.getElementById('sidebar').classList.add('open')
+  document.getElementById('sidebar-overlay').classList.add('open')
   document.body.style.overflow = 'hidden'
 }
-
 function closeSidebar() {
-  document.getElementById('sidebar').classList.remove('translate-x-0')
-  document.getElementById('sidebar').classList.add('-translate-x-full')
-  document.getElementById('sb-overlay').classList.add('hidden')
+  document.getElementById('sidebar').classList.remove('open')
+  document.getElementById('sidebar-overlay').classList.remove('open')
   document.body.style.overflow = ''
 }
 
-/* ─── Modals ──────────────────────────────────────────────── */
+/* ── Modals ──────────────────────────────── */
 function openModal(id) {
   const el = document.getElementById(id)
-  if (!el) return
-  el.classList.remove('hidden')
-  el.classList.add('flex')
+  if (el) el.classList.add('open')
 }
-
 function closeModal(id) {
   const el = document.getElementById(id)
-  if (!el) return
-  el.classList.add('hidden')
-  el.classList.remove('flex')
+  if (el) el.classList.remove('open')
 }
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    // Fermer modals ouvertes
-    document.querySelectorAll('[id^="modal-"]').forEach(m => {
-      if (!m.classList.contains('hidden')) closeModal(m.id)
-    })
-    // Fermer sidebar sur mobile
-    if (window.innerWidth < 768) closeSidebar()
-  }
-})
-
-/* ─── Tabs styling ────────────────────────────────────────── */
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', function() {
-    this.closest('div').querySelectorAll('.tab').forEach(t => {
-      t.classList.remove('bg-white/[0.08]', 'text-zinc-200')
-      t.classList.add('text-zinc-400')
-    })
-    this.classList.add('bg-white/[0.08]', 'text-zinc-200')
-    this.classList.remove('text-zinc-400')
+/* Fermer modal en cliquant sur l'overlay */
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open')
   })
 })
 
-/* ─── Resize handler ──────────────────────────────────────── */
+/* Échap */
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return
+  document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'))
+  if (window.innerWidth <= 700) closeSidebar()
+})
+
+/* Resize : reset sidebar si on passe en desktop */
 window.addEventListener('resize', () => {
-  if (window.innerWidth >= 768) {
-    // Sur desktop : sidebar toujours visible, pas de translate
-    const sb = document.getElementById('sidebar')
-    sb.classList.remove('-translate-x-full', 'translate-x-0')
-    document.getElementById('sb-overlay').classList.add('hidden')
+  if (window.innerWidth > 700) {
+    document.getElementById('sidebar-overlay').classList.remove('open')
     document.body.style.overflow = ''
   }
+})
+
+/* ── Tabs ────────────────────────────────── */
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', function () {
+    this.closest('.tabs-wrap').querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
+    this.classList.add('active')
+  })
 })
 </script>
 
