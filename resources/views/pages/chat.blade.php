@@ -414,7 +414,9 @@ input, textarea, select { font-family: inherit; }
   font-size: 12px;
   border-bottom: 1px solid var(--border);
 }
-.banner.show { display: flex; }
+.banner.show,
+.banner[style*="display: flex"],
+.banner[style*="display:flex"] { display: flex; }
 .banner-blocked { background: rgba(248,113,113,.06); color: var(--red); }
 .banner-ia      { background: rgba(45,212,191,.05); color: var(--teal); }
 .banner svg     { width: 12px; height: 12px; stroke: currentColor; fill: none; flex-shrink: 0; }
@@ -433,7 +435,9 @@ input, textarea, select { font-family: inherit; }
   background: var(--bg-1);
   padding: 12px 16px;
 }
-#compose-area.show { display: block; }
+#compose-area.show,
+#compose-area[style*="display: block"],
+#compose-area[style*="display:block"] { display: block; }
 
 #reply-preview {
   display: none;
@@ -441,7 +445,9 @@ input, textarea, select { font-family: inherit; }
   gap: 8px;
   margin-bottom: 8px;
 }
-#reply-preview.show { display: flex; }
+#reply-preview.show,
+#reply-preview[style*="display: flex"],
+#reply-preview[style*="display:flex"] { display: flex; }
 
 .reply-quote {
   flex: 1;
@@ -457,9 +463,9 @@ input, textarea, select { font-family: inherit; }
 }
 
 #upload-preview {
-  display: none;
   margin-bottom: 8px;
 }
+#upload-preview:empty { display: none; }
 
 .compose-row {
   display: flex;
@@ -928,7 +934,8 @@ input, textarea, select { font-family: inherit; }
     z-index: 5;
     display: none;
   }
-  #messages-col.visible-mobile { display: flex; }
+  #messages-col.visible-mobile,
+  #messages-col.visible { display: flex; }
 
   /* Col 3 : bottom sheet sur mobile */
   #profile-col {
@@ -1210,7 +1217,6 @@ input, textarea, select { font-family: inherit; }
           </div>
 
           <div id="upload-preview"></div>
-
           <div class="compose-row">
             <button class="btn-icon" style="margin-bottom:2px;" onclick="App.triggerUpload()" title="Joindre">
               <svg viewBox="0 0 24 24" stroke-width="1.5">
@@ -1381,11 +1387,17 @@ function closeModal(id) {
   if (el) el.classList.remove('open')
 }
 
+/* Exposer globalement pour les onclick HTML et pour chat_app.js */
+window.openSidebar  = openSidebar
+window.closeSidebar = closeSidebar
+window.openModal    = openModal
+window.closeModal   = closeModal
+
 /* Fermer modal en cliquant sur l'overlay */
-document.querySelectorAll('.modal-overlay').forEach(overlay => {
-  overlay.addEventListener('click', e => {
-    if (e.target === overlay) overlay.classList.remove('open')
-  })
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('modal-overlay')) {
+    e.target.classList.remove('open')
+  }
 })
 
 /* Échap */
@@ -1404,6 +1416,7 @@ window.addEventListener('resize', () => {
 })
 
 /* ── Tabs ────────────────────────────────── */
+/* NB: chat_app.js gère aussi switchConvTab — on ne double-bind pas */
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', function () {
     this.closest('.tabs-wrap').querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
@@ -1412,7 +1425,7 @@ document.querySelectorAll('.tab').forEach(tab => {
 })
 </script>
 
-<script type="module" src="../js/chats.js" defer></script>
+<script type="module" src="../js/chat_app.js" defer></script>
 
 </body>
 </html>
