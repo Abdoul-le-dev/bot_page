@@ -357,59 +357,84 @@ function renderGold(d) {
 
   const saison = Object.keys(sais).length
 
+  // Bloc saison stats (affiché seulement si saison active)
+  const saisonBlock = saison ? `
+    <div class="card">
+      <p style="font-size:11px;color:#52525b;margin-bottom:12px;">Saison active</p>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+        <div class="stat-mini" style="text-align:center;">
+          <p style="font-size:18px;font-weight:300;color:#fafafa;font-family:'Geist Mono',monospace;">${sais.trades || 0}</p>
+          <p style="font-size:9px;color:#52525b;margin-top:3px;">Trades</p>
+        </div>
+        <div class="stat-mini" style="text-align:center;">
+          <p style="font-size:18px;font-weight:300;font-family:'Geist Mono',monospace;" class="pnl-pos">${sais.win_rate || 0}%</p>
+          <p style="font-size:9px;color:#52525b;margin-top:3px;">Win rate</p>
+        </div>
+        <div class="stat-mini" style="text-align:center;">
+          <p style="font-size:18px;font-weight:300;color:#34d399;font-family:'Geist Mono',monospace;">${sais.wins || 0}</p>
+          <p style="font-size:9px;color:#34d399;margin-top:3px;">Wins</p>
+        </div>
+        <div class="stat-mini" style="text-align:center;">
+          <p style="font-size:18px;font-weight:300;color:#f87171;font-family:'Geist Mono',monospace;">${sais.losses || 0}</p>
+          <p style="font-size:9px;color:#f87171;margin-top:3px;">Losses</p>
+        </div>
+      </div>
+      ${sais.rendement_pct != null ? `
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:11px;color:#52525b;">Rendement saison membres</span>
+          <span style="font-size:16px;font-weight:300;font-family:'Geist Mono',monospace;"
+                class="${(sais.rendement_pct || 0) >= 0 ? 'pnl-pos' : 'pnl-neg'}">
+            ${(sais.rendement_pct || 0) > 0 ? '+' : ''}${sais.rendement_pct || 0}%
+          </span>
+        </div>` : ''}
+    </div>` : ''
+
+  const simsBlock = sims.length ? `
+    <div class="card">
+      <p style="font-size:11px;color:#52525b;margin-bottom:10px;">Comptes simulation</p>
+      <div style="display:grid;grid-template-columns:repeat(${Math.min(3, sims.length)},1fr);gap:8px;">${simsHtml}</div>
+    </div>` : ''
+
+  // Détermine si on affiche le sessionBlock (session active OU pas de session)
+  const hasSession = Object.keys(sess).length > 0
+
   document.getElementById('row4-gold').innerHTML = `
     <div style="display:flex;flex-direction:column;gap:12px;" class="fadein">
+
+      <!-- Titre -->
       <div style="display:flex;align-items:center;gap:8px;">
         <span style="font-size:16px;">⚡</span>
         <p style="font-size:13px;font-weight:500;color:#fafafa;">Gold XAU/USD</p>
         ${saison ? `<span class="badge badge-gold">Saison : ${sais.nom || '—'}</span>` : ''}
       </div>
-      <div style="display:grid;grid-template-columns:${saison ? '1fr 1fr' : '1fr'};gap:12px;align-items:start;">
-        <div style="display:flex;flex-direction:column;gap:12px;">
-          ${sessionBlock}
-        </div>
-        ${saison ? `
-        <div style="display:flex;flex-direction:column;gap:12px;">
-          <div class="card">
-            <p style="font-size:11px;color:#52525b;margin-bottom:12px;">Saison active</p>
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
-              <div class="stat-mini" style="text-align:center;">
-                <p style="font-size:18px;font-weight:300;color:#fafafa;font-family:'Geist Mono',monospace;">${sais.trades || 0}</p>
-                <p style="font-size:9px;color:#52525b;margin-top:3px;">Trades</p>
-              </div>
-              <div class="stat-mini" style="text-align:center;">
-                <p style="font-size:18px;font-weight:300;font-family:'Geist Mono',monospace;" class="pnl-pos">${sais.win_rate || 0}%</p>
-                <p style="font-size:9px;color:#52525b;margin-top:3px;">Win rate</p>
-              </div>
-              <div class="stat-mini" style="text-align:center;">
-                <p style="font-size:18px;font-weight:300;color:#34d399;font-family:'Geist Mono',monospace;">${sais.wins || 0}</p>
-                <p style="font-size:9px;color:#34d399;margin-top:3px;">Wins</p>
-              </div>
-              <div class="stat-mini" style="text-align:center;">
-                <p style="font-size:18px;font-weight:300;color:#f87171;font-family:'Geist Mono',monospace;">${sais.losses || 0}</p>
-                <p style="font-size:9px;color:#f87171;margin-top:3px;">Losses</p>
-              </div>
-            </div>
-            ${sais.rendement_pct != null ? `
-              <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:space-between;">
-                <span style="font-size:11px;color:#52525b;">Rendement saison membres</span>
-                <span style="font-size:16px;font-weight:300;font-family:'Geist Mono',monospace;"
-                      class="${(sais.rendement_pct || 0) >= 0 ? 'pnl-pos' : 'pnl-neg'}">
-                  ${(sais.rendement_pct || 0) > 0 ? '+' : ''}${sais.rendement_pct || 0}%
-                </span>
-              </div>` : ''}
-          </div>
-          ${sims.length ? `
-          <div class="card">
-            <p style="font-size:11px;color:#52525b;margin-bottom:10px;">Comptes simulation</p>
-            <div style="display:grid;grid-template-columns:repeat(${Math.min(3, sims.length)},1fr);gap:8px;">${simsHtml}</div>
-          </div>` : ''}
-        </div>` : (sims.length ? `
-        <div class="card">
-          <p style="font-size:11px;color:#52525b;margin-bottom:10px;">Comptes simulation</p>
-          <div style="display:grid;grid-template-columns:repeat(${Math.min(3, sims.length)},1fr);gap:8px;">${simsHtml}</div>
-        </div>` : '')}
-      </div>
+
+      <!-- Layout : grille responsive
+           - Pas de session + pas de saison  → 1 col (rien ou juste sims)
+           - Session active                  → session pleine largeur, puis saison+sims en dessous
+           - Saison sans session             → saison + sims côte à côte sur desktop
+      -->
+      ${hasSession ? `
+        <!-- Session pleine largeur -->
+        ${sessionBlock}
+        <!-- Saison + sims en dessous, côte à côte sur desktop -->
+        ${(saisonBlock || simsBlock) ? `
+        <div class="gold-bottom-grid">
+          ${saisonBlock}
+          ${simsBlock}
+        </div>` : ''}
+      ` : `
+        <!-- Pas de session : saison + sims côte à côte, ou juste l'un d'eux -->
+        ${(saisonBlock || simsBlock) ? `
+        <div class="gold-bottom-grid">
+          ${saisonBlock}
+          ${simsBlock}
+        </div>` : `
+        <div class="card" style="text-align:center;padding:24px;">
+          <p style="font-size:12px;color:#52525b;">Aucune session Gold active</p>
+          <a href="/trade" style="display:inline-flex;align-items:center;gap:5px;margin-top:10px;font-size:11px;color:#fbbf24;text-decoration:none;">Créer un trade Gold →</a>
+        </div>`}
+      `}
+
     </div>
   `
 }

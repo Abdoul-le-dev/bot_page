@@ -122,3 +122,16 @@
     grid-template-columns: repeat(5, 1fr);
   }
 }
+
+/* ── Gold bottom grid (saison + sims) ── */
+.gold-bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+@media (min-width: 768px) {
+  .gold-bottom-grid {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
