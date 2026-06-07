@@ -304,7 +304,7 @@ function renderGold(d) {
   const phaseLabel = phaseLabels[sess.current_phase] || (sess.current_phase || '—')
 
   const sessionBlock = Object.keys(sess).length ? `
-    <div class="card-gold" sytle="display:none">
+    <div class="card-gold">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
           <span class="live-dot pulse" style="background:#fbbf24;"></span>
@@ -314,7 +314,7 @@ function renderGold(d) {
         <a href="/trade" style="font-size:11px;color:#52525b;text-decoration:none;display:flex;align-items:center;gap:4px;"
            onmouseover="this.style.color='#fbbf24'" onmouseout="this.style.color='#52525b'">Gérer →</a>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">
+      <div class="gold-stats-grid">
         <div class="stat-gold" style="text-align:center;">
           <p style="font-size:18px;font-weight:300;color:#fafafa;font-family:'Geist Mono',monospace;">${sess.membres_confirmes || 0}</p>
           <p style="font-size:9px;color:#52525b;margin-top:3px;">Confirmés</p>
@@ -337,7 +337,7 @@ function renderGold(d) {
         </div>
       </div>
     </div>` : `
-    <div class="card" style="text-align:center;padding:24px; display:none">
+    <div class="card" style="text-align:center;padding:24px;">
       <p style="font-size:12px;color:#52525b;">Aucune session Gold active</p>
       <a href="/trade" style="display:inline-flex;align-items:center;gap:5px;margin-top:10px;font-size:11px;color:#fbbf24;text-decoration:none;">Créer un trade Gold →</a>
     </div>`

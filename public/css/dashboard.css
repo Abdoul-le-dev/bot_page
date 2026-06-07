@@ -108,3 +108,17 @@
 
 /* mt-2 shorthand used in JS */
 .mt-2 { margin-top: 8px; }
+
+/* ── Gold session stats grid — responsive ── */
+.gold-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+/* 2e ligne : SL + TP1 + TP2 restent sur 3 cols,
+   Confirmés + Lots prennent la pleine largeur sur la 1re ligne */
+@media (min-width: 640px) {
+  .gold-stats-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
