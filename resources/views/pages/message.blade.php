@@ -159,13 +159,21 @@ input, textarea, select { font-family: inherit; color: var(--txt); }
   flex-shrink: 0;
   height: var(--topbar-h);
   display: flex; align-items: center; justify-content: space-between;
-  padding: 0 20px;
+  padding: 0 16px;
   background: var(--bg-1);
   border-bottom: 1px solid var(--border);
-  gap: 12px;
+  gap: 8px; overflow: hidden;
 }
-.topbar-left  { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.topbar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+/* Gauche : se réduit si besoin, ne déborde jamais */
+.topbar-left {
+  display: flex; align-items: center; gap: 8px;
+  flex: 1 1 auto; min-width: 0; overflow: hidden;
+}
+/* Droite : bloc fixe, ne se compresse pas */
+.topbar-right {
+  display: flex; align-items: center; gap: 6px;
+  flex-shrink: 0;
+}
 
 #hamburger {
   display: flex; align-items: center; justify-content: center;
@@ -173,31 +181,41 @@ input, textarea, select { font-family: inherit; color: var(--txt); }
   border-radius: var(--radius);
   background: rgba(255,255,255,.05);
   border: 1px solid var(--border);
-  color: var(--txt-4);
-  transition: all .15s;
+  color: var(--txt-4); transition: all .15s;
 }
 #hamburger:hover { color: var(--txt); background: rgba(255,255,255,.1); }
 #hamburger svg   { width: 15px; height: 15px; stroke: currentColor; fill: none; }
 
-.topbar-title { font-size: 14px; font-weight: 500; color: white; white-space: nowrap; }
-.topbar-sub   { font-size: 12px; color: var(--txt-5); white-space: nowrap; }
+.topbar-title {
+  font-size: 14px; font-weight: 500; color: white;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  flex-shrink: 1;
+}
+.topbar-sub {
+  font-size: 12px; color: var(--txt-5);
+  white-space: nowrap; flex-shrink: 2;
+}
 
-/* Tabs topbar */
+/* Tabs topbar — bloc compact, icône + label */
 .topbar-tabs {
-  display: flex; align-items: center; gap: 2px;
+  display: flex; align-items: center; gap: 1px;
   background: rgba(255,255,255,.03);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 2px;
+  padding: 2px; flex-shrink: 0;
 }
 .topbar-tab {
-  padding: 5px 12px; border-radius: 6px;
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 10px; border-radius: 6px;
   font-size: 12px; color: var(--txt-4);
   background: none; border: none;
   transition: all .15s; white-space: nowrap;
 }
+.topbar-tab svg    { width: 11px; height: 11px; stroke: currentColor; fill: none; flex-shrink: 0; }
 .topbar-tab:hover  { color: var(--txt-2); }
 .topbar-tab.active { background: rgba(255,255,255,.08); color: var(--txt); }
+/* Label masqué sur petits écrans via media query */
+.tab-label { display: inline; }
 
 /* Notif bell */
 .notif-wrap { position: relative; }
@@ -562,6 +580,10 @@ select.inp   { cursor: pointer; }
   .camp-row > span:nth-child(4)  { display: none; }
 }
 
+@media (max-width: 560px) {
+  .topbar-sub { display: none; }
+}
+
 @media (max-width: 700px) {
   /* Sidebar overlay */
   #sidebar {
@@ -572,8 +594,11 @@ select.inp   { cursor: pointer; }
   #sidebar-overlay.open { display: block; }
   #sidebar-close { display: flex; }
 
-  #topbar { padding: 0 12px; }
+  #topbar { padding: 0 10px; gap: 6px; }
   .topbar-sub { display: none; }
+  .topbar-title { font-size: 13px; }
+  .tab-label { display: none; }
+  .topbar-tab { padding: 5px 8px; gap: 0; }
 
   #page-content { padding: 10px; gap: 10px; }
 
@@ -686,12 +711,12 @@ select.inp   { cursor: pointer; }
         <!-- Tabs Composer / Historique -->
         <div class="topbar-tabs">
           <button class="topbar-tab active" onclick="switchView('compose', this)">
-            <svg style="width:11px;height:11px;display:inline;stroke:currentColor;fill:none;margin-right:4px;" viewBox="0 0 24 24" stroke-width="1.5"><path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4 20-7z"/></svg>
-            Composer
+            <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4 20-7z"/></svg>
+            <span class="tab-label">Composer</span>
           </button>
           <button class="topbar-tab" onclick="switchView('history', this)">
-            <svg style="width:11px;height:11px;display:inline;stroke:currentColor;fill:none;margin-right:4px;" viewBox="0 0 24 24" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-            Historique
+            <svg viewBox="0 0 24 24" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            <span class="tab-label">Historique</span>
           </button>
         </div>
 
