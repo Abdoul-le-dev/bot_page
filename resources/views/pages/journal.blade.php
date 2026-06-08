@@ -227,6 +227,17 @@ textarea.input { resize: vertical; min-height: 60px; }
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
       Règles & Messages
     </button>
+
+    <p class="nav-section">Principal</p>
+
+      <a href="/dashboard"
+         class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[13px] text-zinc-50 bg-white/[0.07] transition-all">
+        <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+        </svg>
+        Dashboard
+      </a>
   </nav>
   <!-- Close sidebar (mobile) -->
   <button class="lg:hidden m-3 btn-ghost justify-center" onclick="closeSidebar()">
