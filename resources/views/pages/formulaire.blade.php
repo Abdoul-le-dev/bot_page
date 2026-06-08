@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TradingBot — Formulaires</title>
+<title>Felipe Bot — Formulaires</title>
 <link rel="preconnect" href="https://fonts.bunny.net">
 <link href="https://fonts.bunny.net/css?family=geist:300,400,500,600&family=geist-mono:400" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js" defer></script>
@@ -700,7 +700,7 @@ select.inp   { cursor: pointer; }
     <div class="sb-head">
       <div class="sb-logo">
         <div class="sb-logo-ico">⚡</div>
-        <span class="sb-logo-txt">TradingBot</span>
+        <span class="sb-logo-txt">Felipe Bot</span>
       </div>
       <button id="sb-close" onclick="closeSidebar()">✕</button>
     </div>
@@ -1098,7 +1098,7 @@ select.inp   { cursor: pointer; }
                     <svg width="13" height="13" fill="white" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19l-2.02 9.52c-.14.66-.54.82-1.09.51l-3-2.21-1.45 1.39c-.16.16-.3.3-.61.3l.22-3.1 5.6-5.06c.24-.22-.06-.34-.38-.12L7.03 14.5 4.06 13.6c-.65-.2-.66-.65.14-.96l11.65-4.5c.54-.2 1.01.13.09 2.05z"/></svg>
                   </div>
                   <div style="flex:1">
-                    <p id="prev-name" style="font-size:11px;font-weight:500;color:#e2e8f0">TradingBot</p>
+                    <p id="prev-name" style="font-size:11px;font-weight:500;color:#e2e8f0">Felipe Bot</p>
                     <p style="font-size:9px;color:#4a6478">bot · en ligne</p>
                   </div>
                   <div style="min-width:55px">
@@ -2096,7 +2096,7 @@ function resetPrev(){ curStep=0; buildDots(); renderStep(0); }
 
 /* META */
 function updateMeta() {
-  const n=$('prev-name'),nm=$('f-name')?.value; if(n&&nm)n.textContent=nm||'TradingBot';
+  const n=$('prev-name'),nm=$('f-name')?.value; if(n&&nm)n.textContent=nm||'Felipe Bot';
   const p=$('cmd-pill'),c=$('f-cmd')?.value; if(p)p.textContent=c?'/'+c:'/formulaire';
   const mpbName=$('mpb-name'); if(mpbName) mpbName.textContent=nm||'Sans titre';
 }
@@ -2108,8 +2108,8 @@ function onTriggerChange(){ const sel=$('f-trigger'),wrap=$('trigger-date-wrap')
    TEMPLATES
    ════════════════════════════════════════════════════ */
 const TPLS = {
-  inscription:{ name:'Onboarding Forex', cmd:'start', type:'inscription', intro:'Bonjour +prenom ! 👋\n\nBienvenue dans la communauté TradingBot.', outro:'✅ Bienvenue +prenom !', fields:[{type:'text',label:'Quel est ton prénom ?',ph:'Marc',required:true,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''},{type:'email',label:'Ton adresse email ?',ph:'marc@gmail.com',required:true,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''},{type:'qcm',label:'Ton niveau en trading ?',required:true,quiz:false,opts:[{t:'🟢 Débutant',c:false,pts:10},{t:'🟡 Intermédiaire',c:false,pts:10},{t:'🔴 Expert',c:false,pts:10}],correctAnswer:null,pts:10,expl:''},{type:'long',label:'Quel est ton objectif principal ?',ph:'Ex: viser +5% par mois',required:false,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''}]},
-  sondage:{ name:'Sondage satisfaction', cmd:'sondage', type:'sondage', intro:'📊 Sondage de satisfaction\n\n3 questions rapides.', outro:'🙏 Merci +prenom !', fields:[{type:'note5',label:'Note la qualité des signaux cette semaine (1 à 5) ?',required:true,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''},{type:'nps',label:'Sur 10, tu recommanderais TradingBot à un ami ?',required:true,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''},{type:'qcm',label:"Qu'est-ce que tu apprécies le plus ?",required:true,quiz:false,opts:[{t:'📈 Les signaux',c:false,pts:10},{t:'💬 Le support',c:false,pts:10},{t:'📚 La formation',c:false,pts:10}],correctAnswer:null,pts:10,expl:''}]},
+  inscription:{ name:'Onboarding Forex', cmd:'start', type:'inscription', intro:'Bonjour +prenom ! 👋\n\nBienvenue dans la communauté Felipe Bot.', outro:'✅ Bienvenue +prenom !', fields:[{type:'text',label:'Quel est ton prénom ?',ph:'Marc',required:true,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''},{type:'email',label:'Ton adresse email ?',ph:'marc@gmail.com',required:true,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''},{type:'qcm',label:'Ton niveau en trading ?',required:true,quiz:false,opts:[{t:'🟢 Débutant',c:false,pts:10},{t:'🟡 Intermédiaire',c:false,pts:10},{t:'🔴 Expert',c:false,pts:10}],correctAnswer:null,pts:10,expl:''},{type:'long',label:'Quel est ton objectif principal ?',ph:'Ex: viser +5% par mois',required:false,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''}]},
+  sondage:{ name:'Sondage satisfaction', cmd:'sondage', type:'sondage', intro:'📊 Sondage de satisfaction\n\n3 questions rapides.', outro:'🙏 Merci +prenom !', fields:[{type:'note5',label:'Note la qualité des signaux cette semaine (1 à 5) ?',required:true,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''},{type:'nps',label:'Sur 10, tu recommanderais Felipe Bot à un ami ?',required:true,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''},{type:'qcm',label:"Qu'est-ce que tu apprécies le plus ?",required:true,quiz:false,opts:[{t:'📈 Les signaux',c:false,pts:10},{t:'💬 Le support',c:false,pts:10},{t:'📚 La formation',c:false,pts:10}],correctAnswer:null,pts:10,expl:''}]},
   quiz:{ name:'Quiz Analyse Technique', cmd:'quiz', type:'quiz', intro:'📚 Quiz Analyse Technique\n\nBonjour +prenom ! 4 questions. Bonne chance ! 🎯', outro:'🎉 Quiz terminé +prenom !\n\nTon score : +score / +total', fields:[{type:'qcm',label:"Qu'est-ce qu'un Doji indique ?",required:true,quiz:true,expl:'Le Doji = indécision.',opts:[{t:'Indécision du marché',c:true,pts:10},{t:'Tendance haussière forte',c:false,pts:0},{t:'Signal de vente fiable',c:false,pts:0}],correctAnswer:null,pts:10},{type:'qcm',label:'Le RSI à 75 signifie que le marché est :',required:true,quiz:true,expl:'RSI > 70 = suracheté.',opts:[{t:'Suracheté 🔴',c:true,pts:10},{t:'Survendu 🟢',c:false,pts:0},{t:'Neutre ⚪',c:false,pts:0}],correctAnswer:null,pts:10},{type:'oui_non',label:'Le croisement MA20/MA50 à la hausse est-il haussier ?',required:true,quiz:true,correctAnswer:'oui',expl:'Oui — signal classique.',opts:[],pts:10}]},
   journal:{ name:'Journal de trading hebdo', cmd:'journal', type:'journal', intro:'📓 Journal — Semaine du +date\n\nBonjour +prenom !', outro:'✅ Journal enregistré +prenom !', fields:[{type:'qcm',label:'Quelle paire as-tu principalement tradée ?',required:true,quiz:false,opts:[{t:'EUR/USD',c:false,pts:10},{t:'GBP/USD',c:false,pts:10},{t:'XAU/USD',c:false,pts:10},{t:'BTC/USD',c:false,pts:10}],correctAnswer:null,pts:10,expl:''},{type:'note5',label:'Note ta discipline cette semaine (1 à 5) ?',required:true,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''},{type:'number',label:'Combien de trades as-tu réalisés ?',ph:'5',required:true,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''},{type:'long',label:'Tes notes et observations',ph:"Qu'as-tu appris cette semaine ?",required:false,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''}]},
   temoignage:{ name:'Témoignage performance', cmd:'temoignage', type:'temoignage', intro:'⭐ Partage ton témoignage +prenom !', outro:'✨ Merci +prenom ! 🚀', fields:[{type:'note5',label:'Sur 5, quelle note donnes-tu à notre méthode ?',required:true,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''},{type:'long',label:'Décris ta meilleure performance récente 📈',ph:'Ex: +4.2% sur EUR/USD…',required:true,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''}]},

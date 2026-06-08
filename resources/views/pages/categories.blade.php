@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Catégories — TradingBot Admin</title>
+<title>Catégories — Felipe Bot Admin</title>
 <link rel="preconnect" href="https://fonts.bunny.net">
 <link href="https://fonts.bunny.net/css?family=geist:300,400,500,600&family=geist-mono:400" rel="stylesheet">
 <style>
@@ -668,7 +668,7 @@ select.inp   { appearance: none; -webkit-appearance: none; cursor: pointer; }
     <div class="sb-head">
       <div class="sb-logo">
         <div class="sb-logo-ico">⚡</div>
-        <span class="sb-logo-txt">TradingBot</span>
+        <span class="sb-logo-txt">Felipe Bot</span>
       </div>
       <button id="sb-close" onclick="closeSidebar()">✕</button>
     </div>

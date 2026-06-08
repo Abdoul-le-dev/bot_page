@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TradingBot — Messages ciblés</title>
+<title>Felipe Bot — Messages ciblés</title>
 <link rel="preconnect" href="https://fonts.bunny.net">
 <link href="https://fonts.bunny.net/css?family=geist:300,400,500,600&family=geist-mono:400" rel="stylesheet">
 <style>
@@ -657,7 +657,7 @@ select.inp   { cursor: pointer; }
     <div class="sb-head">
       <div class="sb-logo">
         <div class="sb-logo-icon">⚡</div>
-        <span class="sb-logo-text">TradingBot</span>
+        <span class="sb-logo-text">Felipe Bot</span>
       </div>
       <button id="sidebar-close" onclick="closeSidebar()">✕</button>
     </div>
@@ -1004,7 +1004,7 @@ select.inp   { cursor: pointer; }
               <div class="tg-header">
                 <div style="width:28px;height:28px;border-radius:50%;background:#0ea5e9;flex-shrink:0;"></div>
                 <div>
-                  <p style="font-size:12px;font-weight:500;color:#e2e8f0;">TradingBot</p>
+                  <p style="font-size:12px;font-weight:500;color:#e2e8f0;">Felipe Bot</p>
                   <p style="font-size:10px;color:#4a6478;">bot</p>
                 </div>
               </div>
@@ -1031,7 +1031,7 @@ select.inp   { cursor: pointer; }
               <div class="tg-header">
                 <div style="width:28px;height:28px;border-radius:50%;background:#0ea5e9;flex-shrink:0;"></div>
                 <div>
-                  <p style="font-size:12px;font-weight:500;color:#e2e8f0;">TradingBot</p>
+                  <p style="font-size:12px;font-weight:500;color:#e2e8f0;">Felipe Bot</p>
                   <p style="font-size:10px;color:#4a6478;">bot</p>
                 </div>
               </div>

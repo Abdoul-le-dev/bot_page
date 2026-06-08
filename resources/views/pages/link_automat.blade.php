@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Growth Hub — TradingBot Admin</title>
+<title>Growth Hub — Felipe Bot Admin</title>
 <link rel="preconnect" href="https://fonts.bunny.net">
 <link href="https://fonts.bunny.net/css?family=geist:300,400,500,600&family=geist-mono:400,500" rel="stylesheet">
 <style>
@@ -542,7 +542,7 @@ select.inp    { appearance: none; -webkit-appearance: none; cursor: pointer; }
     <div class="sb-head">
       <div class="sb-logo">
         <div class="sb-logo-ico">⚡</div>
-        <span class="sb-logo-txt">TradingBot</span>
+        <span class="sb-logo-txt">Felipe Bot</span>
       </div>
       <button id="sb-close" onclick="closeSidebar()">✕</button>
     </div>
@@ -725,7 +725,7 @@ select.inp    { appearance: none; -webkit-appearance: none; cursor: pointer; }
       </div>
       <div>
         <label class="field-label">URL générée</label>
-        <div class="url-preview" id="link-preview-url">t.me/TradingBot?start=</div>
+        <div class="url-preview" id="link-preview-url">t.me/Felipe Bot?start=</div>
       </div>
       <div class="form-grid-2">
         <div>
@@ -787,7 +787,7 @@ select.inp    { appearance: none; -webkit-appearance: none; cursor: pointer; }
       <div class="tg">
         <div class="tg-top">
           <div class="tg-ico"><svg width="9" height="9" fill="white" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19l-2.02 9.52c-.14.66-.54.82-1.09.51l-3-2.21-1.45 1.39c-.16.16-.3.3-.61.3l.22-3.1 5.6-5.06c.24-.22-.06-.34-.38-.12L7.03 14.5 4.06 13.6c-.65-.2-.66-.65.14-.96l11.65-4.5c.54-.2 1.01.13.09 2.05z"/></svg></div>
-          <p style="font-size:9px;font-weight:600;color:#e2e8f0;margin-left:5px;">TradingBot</p>
+          <p style="font-size:9px;font-weight:600;color:#e2e8f0;margin-left:5px;">Felipe Bot</p>
         </div>
         <div class="tg-body"><div class="tg-bbl" id="bc-preview">Votre message apparaîtra ici...</div></div>
       </div>
@@ -968,7 +968,7 @@ async function populateBcTarget() {
    ═══════════════════════════════════════════ */
 function updateLinkPreview() {
   const p = document.getElementById('link-param').value.trim().replace(/\s+/g,'_').toLowerCase();
-  document.getElementById('link-preview-url').textContent = `t.me/TradingBot?start=${p||'...'}`;
+  document.getElementById('link-preview-url').textContent = `t.me/Felipe Bot?start=${p||'...'}`;
 }
 
 async function renderLinks() {
@@ -1026,7 +1026,7 @@ function openLinkDrawer(id) {
       <div class="stat-m" style="text-align:center;"><p class="stat-val">${regs}</p><p class="stat-lbl" style="margin-top:4px;">Inscrits</p></div>
       <div class="stat-m" style="text-align:center;"><p class="stat-val sky-txt">${subs}</p><p class="stat-lbl" style="margin-top:4px;">Payants</p></div>
     </div>
-    <div><p class="slbl">Lien</p><div class="url-preview">https://t.me/TradingBot?start=${l.start_param}</div>
+    <div><p class="slbl">Lien</p><div class="url-preview">https://t.me/Felipe Bot?start=${l.start_param}</div>
       <button class="btn-ghost" style="width:100%;justify-content:center;margin-top:8px;font-size:11px;" onclick="copyLink('${l.start_param}')">Copier le lien</button></div>
     <div><p class="slbl">Config</p>
       <div style="display:flex;flex-direction:column;gap:0;">
@@ -1063,7 +1063,7 @@ function resetLinkForm() {
   ['link-name','link-param','link-promo','link-quota','link-expires'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
   document.getElementById('link-edit-id').value='';
   document.getElementById('link-modal-title').textContent="Créer un lien d'invitation";
-  document.getElementById('link-preview-url').textContent='t.me/TradingBot?start=';
+  document.getElementById('link-preview-url').textContent='t.me/Felipe Bot?start=';
   document.getElementById('link-form').value='';
 }
 
@@ -1096,7 +1096,7 @@ async function deleteCurrentLink() {
 }
 
 function copyLink(param) {
-  navigator.clipboard.writeText(`https://t.me/TradingBot?start=${param}`)
+  navigator.clipboard.writeText(`https://t.me/Felipe Bot?start=${param}`)
     .then(()=>toast('Lien copié ✓','success')).catch(()=>toast('Copie impossible','error'));
 }
 
