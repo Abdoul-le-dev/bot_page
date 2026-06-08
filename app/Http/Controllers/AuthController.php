@@ -20,7 +20,7 @@ class AuthController extends Controller
     //     'created_at' => now(),
     //     'updated_at' => now(),
     // ]);
-        if (Auth::check() && in_array(Auth::user())) {
+        if (Auth::check() ) {
             return $this->redirectAfterLogin(Auth::user());
         }
         return view('login');
