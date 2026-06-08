@@ -15,8 +15,8 @@ class AuthController extends Controller
     {   
     //     DB::table('users')->insert([
     //     'name' => 'fiacre',
-    //     'email' => 'admin@fiacregoldtrade.com',
-    //     'password' => Hash::make('Fdksignal2026@'),
+    //     'email' => '',
+    //     'password' => Hash::make(''),
     //     'created_at' => now(),
     //     'updated_at' => now(),
     // ]);
