@@ -35,10 +35,10 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $user = Auth::user();
-            if (! in_array($user->role, ['super_admin', 'admin', 'user'])) {
-                Auth::logout();
-                return back()->withErrors(['email' => 'Accès non autorisé.']);
-            }
+            // if (! in_array($user->role, ['super_admin', 'admin', 'user'])) {
+            //     Auth::logout();
+            //     return back()->withErrors(['email' => 'Accès non autorisé.']);
+            // }
             $request->session()->regenerate();
             return $this->redirectAfterLogin($user);
         }
