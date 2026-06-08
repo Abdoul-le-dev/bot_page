@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TradingBot — Chat direct</title>
+<title>Felipe Bot — Chat direct</title>
 <link rel="preconnect" href="https://fonts.bunny.net">
 <link href="https://fonts.bunny.net/css?family=geist:300,400,500,600&family=geist-mono:400" rel="stylesheet">
 <style>
@@ -988,7 +988,7 @@ input, textarea, select { font-family: inherit; }
     <div class="sb-head">
       <div class="sb-logo">
         <div class="sb-logo-icon">⚡</div>
-        <span class="sb-logo-text">TradingBot</span>
+        <span class="sb-logo-text">Felipe Bot</span>
       </div>
       <button id="sidebar-close" onclick="closeSidebar()">✕</button>
     </div>

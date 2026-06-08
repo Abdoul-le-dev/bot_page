@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TradingBot — IA Config</title>
+<title>Felipe Bot — IA Config</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.bunny.net">
 <link href="https://fonts.bunny.net/css?family=geist:300,400,500,600&family=geist-mono:400,500" rel="stylesheet">
@@ -93,7 +93,7 @@ textarea.input{resize:vertical;font-family:'Geist Mono',monospace;font-size:12px
     <button class="nav-item" id="nav-endpoints" onclick="sv('endpoints',this)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/><path d="M3.6 9h16.8M3.6 15h16.8M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>Endpoints API</button>
   </nav>
   <div class="px-4 py-3" style="border-top:1px solid rgba(255,255,255,.05);">
-    <div class="flex items-center gap-2.5"><div style="width:27px;height:27px;border-radius:50%;background:linear-gradient(135deg,#0ea5e9,#6366f1);flex-shrink:0;"></div><div><p class="text-xs font-medium text-white">Admin</p><p class="text-[10px]" style="color:#3f3f46;">admin@tradingbot.io</p></div></div>
+    <div class="flex items-center gap-2.5"><div style="width:27px;height:27px;border-radius:50%;background:linear-gradient(135deg,#0ea5e9,#6366f1);flex-shrink:0;"></div><div><p class="text-xs font-medium text-white">Admin</p><p class="text-[10px]" style="color:#3f3f46;">admin@Felipe Bot.io</p></div></div>
   </div>
 </aside>
 
