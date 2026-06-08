@@ -38,8 +38,8 @@ Route::middleware(['auth'])->group(function () {
 
 
 
-    Route::get('/categorie',function () {return view('pages.categories');});
-    Route::get('/chat',function () {return view('pages.chat');});
+    Route::get('/categorie',function () {return view('pages.categories');})->name('categories');
+    Route::get('/chat',function () {return view('pages.chat');})->name('chat');
 
     
  });
