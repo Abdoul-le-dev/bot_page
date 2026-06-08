@@ -38,7 +38,7 @@ class AuthController extends Controller
 
     private function redirectAfterLogin($user)
     {
-        return route('dashboard')
+        return route('dashboard');
     }
 
     public function logout(Request $request)
