@@ -58,7 +58,7 @@ html, body { height: 100dvh; overflow: hidden; font-family: 'Geist', sans-serif;
    LAYOUT RACINE
    ═══════════════════════════════════════════ */
 #app  { display: flex; height: 100dvh; overflow: hidden; }
-#main { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
+#main { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
 
 /* ═══════════════════════════════════════════
    SIDEBAR
@@ -142,8 +142,9 @@ html, body { height: 100dvh; overflow: hidden; font-family: 'Geist', sans-serif;
 }
 .topbar-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 
+/* Hamburger — visible uniquement mobile */
 #hamburger {
-  display: flex; align-items: center; justify-content: center;
+  display: none; align-items: center; justify-content: center;
   width: 30px; height: 30px; flex-shrink: 0;
   border-radius: var(--radius);
   background: rgba(255,255,255,.05); border: 1px solid var(--border);
@@ -311,12 +312,14 @@ select.inp   { appearance: none; -webkit-appearance: none; cursor: pointer; }
    ═══════════════════════════════════════════ */
 #cat-workspace {
   flex: 1; display: flex; min-height: 0; overflow: hidden;
+  align-items: stretch;
 }
 
 /* ── Colonne gauche (liste catégories) ── */
 #cat-left {
   width: 240px; min-width: 240px; max-width: 240px;
-  display: flex; flex-direction: column; min-height: 0;
+  display: flex; flex-direction: column;
+  min-height: 0; max-height: 100%; overflow: hidden;
   border-right: 1px solid var(--border);
   background: var(--bg-1);
 }
@@ -333,7 +336,7 @@ select.inp   { appearance: none; -webkit-appearance: none; cursor: pointer; }
 .stat-mini .stat-lbl  { font-size: 10px; color: var(--txt-4); margin-top: 2px; }
 .stat-mini .stat-green { color: var(--green); }
 
-#cat-list { flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
+#cat-list { flex: 1; min-height: 0; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
 
 /* ── Carte catégorie ── */
 .cat-card {
@@ -569,6 +572,7 @@ select.inp   { appearance: none; -webkit-appearance: none; cursor: pointer; }
    ═══════════════════════════════════════════ */
 @media (max-width: 768px) {
   /* Sidebar mobile */
+  #hamburger  { display: flex; }
   #sidebar {
     position: fixed; top: 0; left: 0; height: 100%;
     transform: translateX(-100%);
@@ -585,7 +589,7 @@ select.inp   { appearance: none; -webkit-appearance: none; cursor: pointer; }
   #cat-right  { display: none; }
 
   /* Colonne gauche + detail : bascule */
-  #cat-left   { width: 100%; min-width: 0; max-width: 100%; border-right: none; }
+  #cat-left   { width: 100%; min-width: 0; max-width: 100%; max-height: 100%; border-right: none; }
   #cat-detail { display: none; }
   #cat-left.hidden-mobile   { display: none; }
   #cat-detail.visible-mobile { display: flex; }
@@ -1450,8 +1454,11 @@ function renderCatCard(cat, maxCount) {
           </div>
           <div class="cat-card-actions">
             ${triggerPill(cat.rules)}
-            <button class="btn-icon" style="width:22px;height:22px;" onclick="event.stopPropagation();App.openEditModal('${cat.name_categorie}')">
+            <button class="btn-icon" style="width:22px;height:22px;" onclick="event.stopPropagation();App.openEditModal('${cat.name_categorie}')" title="Modifier">
               <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="btn-icon del" style="width:22px;height:22px;" onclick="event.stopPropagation();App.openDeleteModalByName('${cat.name_categorie}')" title="Supprimer">
+              <svg viewBox="0 0 24 24" stroke-width="1.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
             </button>
           </div>
         </div>
@@ -1985,6 +1992,14 @@ const App = (() => {
   function openMergeModal()  { if (!State.selected) return; renderMergeModal(State.selected.name_categorie, State.categories); openModal('modal-merge'); }
   function openMoveModal()   { if (!State.selected) return; renderMoveModal(State.selected.name_categorie, State.categories);  openModal('modal-move');  }
   function openDeleteModal() { if (!State.selected) return; renderDeleteModal(State.selected); openModal('modal-delete'); }
+  function openDeleteModalByName(name) {
+    const cat = State.categories.find(c=>c.name_categorie===name);
+    if (!cat) return;
+    // Sélectionner temporairement pour que btn-delete-confirm fonctionne
+    State.selected = cat;
+    renderDeleteModal(cat);
+    openModal('modal-delete');
+  }
   function openImportModal() { renderImportModal(State.categories); openModal('modal-import'); }
   function openAddIdsModal() {
     const sub = document.getElementById('add-ids-modal-sub');
@@ -2007,7 +2022,7 @@ const App = (() => {
   return {
     init, selectCat, switchTab, toggleSelect, loadMoreMembers,
     removeMember, openMemberDrawer, openEditModal, openMergeModal,
-    openMoveModal, openDeleteModal, openImportModal, openAddIdsModal,
+    openMoveModal, openDeleteModal, openDeleteModalByName, openImportModal, openAddIdsModal,
     deleteRule, exportCSV, addMemberToCategory, removeMemberFromDrawer,
     getSelected:        () => State.selected,
     getSelectedMembers: () => State.selectedMembers,
