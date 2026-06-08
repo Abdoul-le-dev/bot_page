@@ -14,9 +14,9 @@ class AuthController extends Controller
     public function loginForm()
     {   
     //     DB::table('users')->insert([
-    //     'name' => 'fiacre',
-    //     'email' => '',
-    //     'password' => Hash::make(''),
+    //     'name' => 'Eric',
+    //     'email' => 'erickossi125@gmail.com',
+    //     'password' => Hash::make('fJ48B0ETQUEf'),
     //     'created_at' => now(),
     //     'updated_at' => now(),
     // ]);
