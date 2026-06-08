@@ -48,7 +48,7 @@ class AuthController extends Controller
 
     private function redirectAfterLogin($user)
     {
-        return route('dashboard');
+        return view('dashboard');
     }
 
     public function logout(Request $request)
@@ -56,6 +56,6 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect()->route('admin.login');
+        return redirect()->view('login');
     }
 }
