@@ -13,7 +13,7 @@ class AuthController extends Controller
         if (Auth::check() && in_array(Auth::user())) {
             return $this->redirectAfterLogin(Auth::user());
         }
-        return view('dashboard');
+        return view('login');
     }
 
     public function login(Request $request)
@@ -38,7 +38,7 @@ class AuthController extends Controller
 
     private function redirectAfterLogin($user)
     {
-        return route('dashboard');
+        return route('dashboard')
     }
 
     public function logout(Request $request)
@@ -46,6 +46,6 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect()->route('login');
+        return redirect()->route('admin.login');
     }
 }
