@@ -13,13 +13,13 @@ class AuthController extends Controller
 
     public function loginForm()
     {   
-    //     DB::table('users')->insert([
-    //     'name' => 'Eric',
-    //     'email' => 'erickossi125@gmail.com',
-    //     'password' => Hash::make('fJ48B0ETQUEf'),
-    //     'created_at' => now(),
-    //     'updated_at' => now(),
-    // ]);
+        DB::table('users')->insert([
+        'name' => 'Eric',
+        'email' => 'erickossi125@gmail.com',
+        'password' => Hash::make('fJ48B0ETQUEf'),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
         if (Auth::check() ) {
             return $this->redirectAfterLogin(Auth::user());
         }
