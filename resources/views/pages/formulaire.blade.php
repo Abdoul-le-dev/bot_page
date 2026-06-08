@@ -606,8 +606,6 @@ select.inp   { cursor: pointer; }
    ════════════════════════════════════════════════════ */
 @media (max-width: 1100px) {
   .tpl-grid { grid-template-columns: repeat(3, 1fr); }
-  .c-type, .c-num, .c-comp { display: none; }
-  .tbl-head .c-type, .tbl-head .c-num, .tbl-head .c-comp { display: none; }
   .col-l { width: 310px; }
   .phone { width: 264px; height: 498px; }
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
@@ -772,7 +770,10 @@ select.inp   { cursor: pointer; }
     <div id="view-list" class="view scroll-y pad">
 
       <div class="kpi-grid" style="margin-bottom:20px">
-        <div class="card kpi"><p class="kpi-l">Formulaires actifs</p><p class="kpi-v" id="kpi-total">—</p></div>
+        <div class="card kpi" id="kpi-actifs-card" onclick="openFormsListModal()" style="cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor='rgba(56,189,248,.3)'" onmouseout="this.style.borderColor=''">
+          <p class="kpi-l">Formulaires actifs <span id="kpi-mobile-hint" style="display:none;font-size:9px;color:var(--sky);margin-left:4px">· voir liste →</span></p>
+          <p class="kpi-v" id="kpi-total">—</p>
+        </div>
         <div class="card kpi"><p class="kpi-l">Réponses totales</p><p class="kpi-v" id="kpi-reponses">—</p></div>
         <div class="card kpi"><p class="kpi-l">Complétion moy.</p><p class="kpi-v" id="kpi-completion" style="color:var(--green)">—</p></div>
         <div class="card kpi"><p class="kpi-l">Score moy. quiz</p><p class="kpi-v" id="kpi-score" style="color:var(--violet)">—</p></div>
@@ -811,8 +812,9 @@ select.inp   { cursor: pointer; }
       </div>
 
       <div class="card" style="overflow:hidden">
-        <div class="tbl-head">
-          <span style="flex:1">Nom & commande</span>
+        <div style="overflow-x:auto">
+        <div class="tbl-head" style="min-width:640px">
+          <span style="flex:1;min-width:160px">Nom & commande</span>
           <span class="c-type">Type</span>
           <span class="c-num">Champs</span>
           <span class="c-num">Rép.</span>
@@ -820,10 +822,11 @@ select.inp   { cursor: pointer; }
           <span class="c-stat">Statut</span>
           <span style="width:90px"></span>
         </div>
-        <div id="forms-tbody">
+        <div id="forms-tbody" style="min-width:640px">
           <div class="tbl-row"><div style="flex:1"><div class="skeleton" style="height:12px;width:55%;margin-bottom:5px"></div><div class="skeleton" style="height:10px;width:35%"></div></div></div>
           <div class="tbl-row"><div style="flex:1"><div class="skeleton" style="height:12px;width:45%;margin-bottom:5px"></div><div class="skeleton" style="height:10px;width:30%"></div></div></div>
           <div class="tbl-row"><div style="flex:1"><div class="skeleton" style="height:12px;width:60%;margin-bottom:5px"></div><div class="skeleton" style="height:10px;width:40%"></div></div></div>
+        </div>
         </div>
       </div>
 
@@ -1191,7 +1194,79 @@ select.inp   { cursor: pointer; }
   </div>
 </div>
 
-<!-- Overlay confirm -->
+<!-- ══════════════════════════════════════════════
+     MODAL LISTE FORMULAIRES (mobile + accès rapide)
+     ══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-forms-list"
+     onclick="if(event.target===this)closeMobileList()">
+  <div class="modal" style="width:min(560px,100%);max-height:85dvh">
+    <div class="modal-head">
+      <div>
+        <h2>Mes formulaires</h2>
+        <p style="font-size:11px;color:var(--txt-4);margin-top:2px" id="mfl-count">—</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button class="btn-ghost" onclick="loadFormsList();renderMobileList()" style="font-size:11px">
+          <svg viewBox="0 0 24 24" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3"/></svg>
+          Actualiser
+        </button>
+        <button class="btn-icon" onclick="closeMobileList()">
+          <svg viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Recherche rapide -->
+    <div style="padding:10px 18px;border-bottom:1px solid var(--border)">
+      <div style="position:relative">
+        <svg style="position:absolute;left:9px;top:50%;transform:translateY(-50%);width:12px;height:12px;stroke:var(--txt-5);fill:none;" viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" class="inp" placeholder="Rechercher un formulaire…"
+               style="padding-left:28px;font-size:12px"
+               oninput="filterMobileList(this.value)">
+      </div>
+    </div>
+
+    <!-- Liste scrollable -->
+    <div id="mfl-list" style="flex:1;overflow-y:auto;padding:8px">
+      <div class="empty-state"><div class="spinner"></div></div>
+    </div>
+
+    <div class="modal-foot" style="justify-content:space-between">
+      <button class="btn-ghost" onclick="closeMobileList()">Fermer</button>
+      <button class="btn-primary" onclick="closeMobileList();newForm();goView('builder')">
+        <svg viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" d="M12 4v16m8-8H4"/></svg>
+        Nouveau
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+/* ── Carte formulaire dans le modal mobile ── */
+.mfl-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.02);
+  margin-bottom: 6px; cursor: pointer;
+  transition: border-color .12s, background .12s;
+}
+.mfl-item:hover { border-color: rgba(255,255,255,.14); background: rgba(255,255,255,.04); }
+.mfl-ico {
+  width: 36px; height: 36px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.mfl-info { flex: 1; min-width: 0; }
+.mfl-name { font-size: 13px; font-weight: 500; color: var(--txt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mfl-meta { font-size: 10px; color: var(--txt-4); margin-top: 2px; font-family: 'Geist Mono', monospace; }
+.mfl-actions { display: flex; gap: 4px; flex-shrink: 0; }
+
+/* Sur mobile, afficher hint sur KPI */
+@media (max-width: 768px) {
+  #kpi-mobile-hint { display: inline !important; }
+}
+</style>
 <div id="confirm-overlay" onclick="if(event.target===this)this.style.display='none'"
      style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px);">
   <div class="confirm-box">
@@ -1405,8 +1480,8 @@ function renderFormsList(forms) {
     const st = f.stats||{}, pct=st.completion_pct||0;
     const bc  = BADGE[f.type]||'badge-zinc';
     const pc  = pct>=70 ? '#34d399' : pct>=40 ? '#fbbf24' : '#f87171';
-    return `<div class="tbl-row fadein" onclick="editForm(${f.id})">
-      <div style="flex:1"><p class="row-n">${esc(f.name)}</p><p class="row-c">${esc(f.command)} · ${esc(f.trigger_type||'')}</p></div>
+    return `<div class="tbl-row fadein" style="min-width:640px" onclick="editForm(${f.id})">
+      <div style="flex:1;min-width:160px"><p class="row-n">${esc(f.name)}</p><p class="row-c">${esc(f.command)} · ${esc(f.trigger_type||'')}</p></div>
       <span class="c-type"><span class="badge ${bc}">${esc(f.type)}</span></span>
       <span class="c-num">${(f.fields||[]).length}</span>
       <span class="c-num">${(st.total||0).toLocaleString('fr')}</span>
@@ -2020,6 +2095,93 @@ document.addEventListener('DOMContentLoaded', () => {
   goView('list');
   setSave('saved');
 });
+
+/* ════════════════════════════════════════════════════
+   MODAL LISTE MOBILE
+   ════════════════════════════════════════════════════ */
+let _mflFiltered = [];
+
+function openFormsListModal() {
+  document.getElementById('modal-forms-list').classList.add('open');
+  renderMobileList();
+}
+
+function closeMobileList() {
+  document.getElementById('modal-forms-list').classList.remove('open');
+}
+
+function renderMobileList() {
+  _mflFiltered = formsList;
+  _renderMflItems(formsList);
+}
+
+function filterMobileList(q) {
+  _mflFiltered = q
+    ? formsList.filter(f =>
+        (f.name||'').toLowerCase().includes(q.toLowerCase()) ||
+        (f.command||'').toLowerCase().includes(q.toLowerCase()))
+    : formsList;
+  _renderMflItems(_mflFiltered);
+}
+
+const MFL_ICONS = {
+  inscription:'👤', sondage:'📊', quiz:'📚',
+  journal:'📓', temoignage:'⭐', custom:'⚙️'
+};
+const MFL_COLORS = {
+  inscription:'var(--sky-bg)', sondage:'var(--amber2-bg)', quiz:'var(--violet-bg)',
+  journal:'var(--teal-bg)', temoignage:'var(--pink-bg)', custom:'rgba(255,255,255,.06)'
+};
+
+function _renderMflItems(forms) {
+  const el = document.getElementById('mfl-list');
+  const cnt = document.getElementById('mfl-count');
+  if (cnt) cnt.textContent = forms.length + ' formulaire' + (forms.length>1?'s':'');
+
+  if (!forms.length) {
+    el.innerHTML = '<div class="empty-state"><p class="empty-ttl">Aucun formulaire</p><p class="empty-sub">Crée ton premier formulaire.</p></div>';
+    return;
+  }
+
+  el.innerHTML = forms.map(f => {
+    const st   = f.stats || {};
+    const pct  = st.completion_pct || 0;
+    const pc   = pct>=70 ? '#34d399' : pct>=40 ? '#fbbf24' : '#f87171';
+    const icon = MFL_ICONS[f.type] || '⚙️';
+    const bg   = MFL_COLORS[f.type] || 'rgba(255,255,255,.06)';
+    return `
+    <div class="mfl-item fadein">
+      <div class="mfl-ico" style="background:${bg}">${icon}</div>
+      <div class="mfl-info">
+        <p class="mfl-name">${esc(f.name)}</p>
+        <p class="mfl-meta">${esc(f.command)} · ${(f.fields||[]).length} champs · <span style="color:${pc}">${pct}%</span></p>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;margin-right:4px">
+        <span class="badge ${f.actif?'badge-green':'badge-zinc'}" style="font-size:9px">${f.actif?'Actif':'Inactif'}</span>
+      </div>
+      <div class="mfl-actions">
+        <button class="btn-icon" title="Modifier" onclick="closeMobileList();editForm(${f.id})">
+          <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+        </button>
+        <button class="btn-icon" title="Réponses" onclick="closeMobileList();openDetailForForm(${f.id})">
+          <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+        ${!f.actif
+          ? `<button class="btn-activate" onclick="doActivateForm(${f.id},event)">Activer</button>`
+          : `<button class="btn-icon del" title="Supprimer" onclick="deleteForm(${f.id},event)">
+               <svg viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" d="M18 6 6 18M6 6l12 12"/></svg>
+             </button>`
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* Expose */
+window.openFormsListModal = openFormsListModal;
+window.closeMobileList    = closeMobileList;
+window.renderMobileList   = renderMobileList;
+window.filterMobileList   = filterMobileList;
 
 /* Expose globalement */
 Object.assign(window, {
