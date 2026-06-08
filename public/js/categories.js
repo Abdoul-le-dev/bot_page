@@ -2,8 +2,7 @@
    categories.js  —  logique JS spécifique à la page Catégories
    ═══════════════════════════════════════════════════════════════ */
 
-// ── Sidebar mobile (dashboard.js gère déjà ça en général,
-//    on le redéfinit ici pour autonomie de la page) ──────────────
+
 function openSidebar() {
   document.getElementById('sidebar')?.classList.add('open')
   document.getElementById('sidebar-overlay')?.classList.add('open')

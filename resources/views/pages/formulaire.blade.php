@@ -1323,9 +1323,9 @@ select.inp   { cursor: pointer; }
   display: flex; align-items: center; justify-content: center;
   font-size: 16px; flex-shrink: 0;
 }
-.mfl-info { flex: 1; min-width: 0; }
+.mfl-info { flex: 1; min-width: 0; overflow: hidden; }
 .mfl-name { font-size: 13px; font-weight: 500; color: var(--txt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.mfl-meta { font-size: 10px; color: var(--txt-4); margin-top: 2px; font-family: 'Geist Mono', monospace; }
+.mfl-meta { font-size: 10px; color: var(--txt-4); margin-top: 2px; font-family: 'Geist Mono', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .mfl-actions { display: flex; gap: 4px; flex-shrink: 0; }
 
 /* Sur mobile, afficher hint sur KPI */
@@ -2231,11 +2231,11 @@ function _renderMflItems(forms) {
     <div class="mfl-item fadein">
       <div class="mfl-ico" style="background:${bg}">${icon}</div>
       <div class="mfl-info">
-        <p class="mfl-name">${esc(f.name)}</p>
-        <p class="mfl-meta">${esc(f.command)} · ${(f.fields||[]).length} champs · <span style="color:${pc}">${pct}%</span></p>
-      </div>
-      <div style="display:flex;align-items:center;gap:4px;margin-right:4px">
-        <span class="badge ${f.actif?'badge-green':'badge-zinc'}" style="font-size:9px">${f.actif?'Actif':'Inactif'}</span>
+        <div style="display:flex;align-items:center;gap:6px;min-width:0">
+          <p class="mfl-name" style="flex:1">${esc(f.name)}</p>
+          <span class="badge ${f.actif?'badge-green':'badge-zinc'}" style="font-size:9px;flex-shrink:0">${f.actif?'Actif':'Inactif'}</span>
+        </div>
+        <p class="mfl-meta">${esc((f.command||'').length > 20 ? f.command.slice(0,20)+'…' : f.command)} · ${(f.fields||[]).length} champs · <span style="color:${pc}">${pct}%</span></p>
       </div>
       <div class="mfl-actions">
         <button class="btn-icon" title="Modifier" onclick="closeMobileList();editForm(${f.id})">
