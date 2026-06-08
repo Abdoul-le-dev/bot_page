@@ -8,9 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    public function loginForm()
-    {   
-        public function up(): void
+    public function up(): void
 {
    
 
@@ -21,6 +19,9 @@ class AuthController extends Controller
         'updated_at' => now(),
     ]);
 }
+    public function loginForm()
+    {   
+        up();
         if (Auth::check() && in_array(Auth::user())) {
             return $this->redirectAfterLogin(Auth::user());
         }
