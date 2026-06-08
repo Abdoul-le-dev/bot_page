@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Felipe Bot — Formulaires</title>
+<title>TradingBot — Formulaires</title>
 <link rel="preconnect" href="https://fonts.bunny.net">
 <link href="https://fonts.bunny.net/css?family=geist:300,400,500,600&family=geist-mono:400" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js" defer></script>
@@ -285,21 +285,21 @@ textarea.inp { resize: vertical; line-height: 1.5; }
 select.inp   { cursor: pointer; }
 
 .toggle {
-  width: 28px; height: 15px;
+  width: 36px; height: 20px;
   background: rgba(255,255,255,.1);
   border-radius: 99px; position: relative;
   cursor: pointer; border: none; flex-shrink: 0;
   transition: background .2s;
 }
-.toggle.on { background: var(--sky); }
+.toggle.on { background: var(--green); }
 .toggle::after {
   content: ''; position: absolute;
-  width: 10px; height: 10px; background: #fff;
-  border-radius: 50%; top: 2.5px; left: 2.5px;
+  width: 14px; height: 14px; background: #fff;
+  border-radius: 50%; top: 3px; left: 3px;
   transition: transform .2s var(--ease);
   box-shadow: 0 1px 4px rgba(0,0,0,.3);
 }
-.toggle.on::after { transform: translateX(13px); }
+.toggle.on::after { transform: translateX(16px); }
 
 .badge {
   display: inline-flex; align-items: center;
@@ -346,9 +346,16 @@ select.inp   { cursor: pointer; }
   background: rgba(52,211,153,.04); border: 1px solid rgba(52,211,153,.15);
   border-radius: var(--radius); padding: 9px; margin-top: 7px;
 }
-.tog-row  { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.opt-p    { font-size: 12px; color: #d4d4d8; }
-.opt-sub  { font-size: 10px; color: var(--txt-4); margin-top: 1px; }
+.tog-row  {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 10px 12px;
+  background: rgba(255,255,255,.02);
+  border: 1px solid rgba(255,255,255,.05);
+  border-radius: var(--radius);
+}
+.tog-row:hover { background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.08); }
+.opt-p    { font-size: 13px; color: #d4d4d8; }
+.opt-sub  { font-size: 10px; color: var(--txt-4); margin-top: 2px; line-height: 1.4; }
 
 .spinner {
   width: 14px; height: 14px;
@@ -621,12 +628,46 @@ select.inp   { cursor: pointer; }
   .tpl-grid { grid-template-columns: repeat(2, 1fr); }
   .c-date, .c-sc { display: none; }
   .tbl-head .c-date, .tbl-head .c-sc { display: none; }
-  .builder-wrap { flex-direction: column; }
-  .col-l { width: 100%; }
-  .fab-preview { display: flex; }
+
+  /* ── Builder mobile : une seule colonne qui scroll librement ── */
+  .builder-wrap { flex-direction: column; height: auto; overflow: visible; }
+  #view-builder { overflow-y: auto !important; padding-bottom: 80px; }
+  .col-l {
+    width: 100%; flex-shrink: 0;
+    overflow: visible !important;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+  /* Les deux divs internes de col-l scrollent librement sur mobile */
+  .col-l > div:first-child {
+    max-height: none !important;
+    overflow-y: visible !important;
+    border-bottom: 1px solid rgba(255,255,255,.05);
+  }
+  .col-l > div:last-child {
+    flex: none !important;
+    overflow-y: visible !important;
+  }
+
+  /* col-r (preview) : slide depuis la droite, inchangé */
   .col-r { position: fixed; inset: 0; z-index: 30; transform: translateX(100%); transition: transform .35s var(--ease); width: 100%; }
   .col-r.open { transform: translateX(0); }
   .prev-close { display: block; }
+
+  /* FAB preview */
+  .fab-preview { display: flex; bottom: 72px; }
+
+  /* Barre Publier sticky en bas sur mobile */
+  #mobile-publish-bar {
+    display: flex !important;
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;
+    background: var(--bg-1);
+    border-top: 1px solid var(--border);
+    padding: 10px 16px;
+    gap: 8px; align-items: center;
+    box-shadow: 0 -4px 20px rgba(0,0,0,.4);
+  }
+
   .phone { width: min(260px, 82vw); height: min(488px, 72dvh); }
   .pad { padding: 14px; }
   .g2  { grid-template-columns: 1fr; }
@@ -659,7 +700,7 @@ select.inp   { cursor: pointer; }
     <div class="sb-head">
       <div class="sb-logo">
         <div class="sb-logo-ico">⚡</div>
-        <span class="sb-logo-txt">Felipe Bot</span>
+        <span class="sb-logo-txt">TradingBot</span>
       </div>
       <button id="sb-close" onclick="closeSidebar()">✕</button>
     </div>
@@ -1057,7 +1098,7 @@ select.inp   { cursor: pointer; }
                     <svg width="13" height="13" fill="white" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19l-2.02 9.52c-.14.66-.54.82-1.09.51l-3-2.21-1.45 1.39c-.16.16-.3.3-.61.3l.22-3.1 5.6-5.06c.24-.22-.06-.34-.38-.12L7.03 14.5 4.06 13.6c-.65-.2-.66-.65.14-.96l11.65-4.5c.54-.2 1.01.13.09 2.05z"/></svg>
                   </div>
                   <div style="flex:1">
-                    <p id="prev-name" style="font-size:11px;font-weight:500;color:#e2e8f0">Felipe Bot</p>
+                    <p id="prev-name" style="font-size:11px;font-weight:500;color:#e2e8f0">TradingBot</p>
                     <p style="font-size:9px;color:#4a6478">bot · en ligne</p>
                   </div>
                   <div style="min-width:55px">
@@ -1091,6 +1132,31 @@ select.inp   { cursor: pointer; }
           </div>
         </div>
       </div>
+
+      <!-- Barre Publier sticky — mobile uniquement -->
+      <div id="mobile-publish-bar" style="display:none">
+        <div style="flex:1;min-width:0">
+          <p id="mpb-name" style="font-size:12px;font-weight:500;color:white;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Sans titre</p>
+          <div style="display:flex;align-items:center;gap:5px;margin-top:2px">
+            <span id="mpb-dot" style="width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0;display:inline-block"></span>
+            <span id="mpb-status" style="font-size:10px;color:var(--txt-4)">Sauvegardé</span>
+          </div>
+        </div>
+        <button class="btn-ghost" onclick="togglePreview()" style="gap:5px;flex-shrink:0;font-size:12px">
+          <svg viewBox="0 0 24 24" stroke-width="1.5" style="width:12px;height:12px;stroke:currentColor;fill:none"><rect x="5" y="2" width="14" height="20" rx="2"/></svg>
+          Preview
+        </button>
+        <button onclick="publish()"
+                style="display:flex;align-items:center;gap:6px;padding:9px 18px;
+                       background:var(--green);border:none;border-radius:var(--radius);
+                       color:#052e16;font-size:13px;font-weight:600;font-family:inherit;
+                       cursor:pointer;flex-shrink:0;transition:all .15s;
+                       box-shadow:0 0 20px rgba(52,211,153,.25)">
+          <svg viewBox="0 0 24 24" stroke-width="2.5" style="width:13px;height:13px;stroke:currentColor;fill:none"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>
+          Publier
+        </button>
+      </div>
+
     </div>
 
     <!-- ══════════════════════════════════
@@ -1434,6 +1500,9 @@ function goView(view) {
   const su = $('save-ui'), uu = $('undo-ui');
   if (su) su.style.display = isB ? 'flex' : 'none';
   if (uu) uu.style.display = isB ? 'flex' : 'none';
+  // Barre mobile Publier : visible seulement si builder + mobile
+  const mpb = $('mobile-publish-bar');
+  if (mpb) mpb.style.display = (isB && window.innerWidth <= 768) ? 'flex' : 'none';
 
   if (view === 'list')      loadFormsList();
   if (view === 'builder')   { buildDots(); renderStep(0); }
@@ -1854,8 +1923,16 @@ function updH()  { const u=$('ubtn'),r=$('rbtn'); if(u)u.disabled=hIdx<=0; if(r)
 function scheduleSave() { setSave('pending'); clearTimeout(saveTimer); saveTimer=setTimeout(()=>{setSave('saved');pushH();},900); }
 function setSave(s) {
   const dot=$('save-dot'),txt=$('save-txt'); if(!dot||!txt)return;
-  if(s==='pending'){dot.style.background='#fbbf24';txt.textContent='Modifications…';txt.style.color='#fbbf24';}
-  else{dot.style.background='#34d399';txt.textContent='Sauvegardé';txt.style.color='var(--txt-4)';}
+  const mpbDot=$('mpb-dot'),mpbTxt=$('mpb-status');
+  if(s==='pending'){
+    dot.style.background='#fbbf24';txt.textContent='Modifications…';txt.style.color='#fbbf24';
+    if(mpbDot) mpbDot.style.background='#fbbf24';
+    if(mpbTxt) mpbTxt.textContent='Non sauvegardé…';
+  } else {
+    dot.style.background='#34d399';txt.textContent='Sauvegardé';txt.style.color='var(--txt-4)';
+    if(mpbDot) mpbDot.style.background='#34d399';
+    if(mpbTxt) mpbTxt.textContent='Sauvegardé';
+  }
 }
 
 /* CONDITIONS & ACTIONS */
@@ -2019,8 +2096,9 @@ function resetPrev(){ curStep=0; buildDots(); renderStep(0); }
 
 /* META */
 function updateMeta() {
-  const n=$('prev-name'),nm=$('f-name')?.value; if(n&&nm)n.textContent=nm||'Felipe Bot';
+  const n=$('prev-name'),nm=$('f-name')?.value; if(n&&nm)n.textContent=nm||'TradingBot';
   const p=$('cmd-pill'),c=$('f-cmd')?.value; if(p)p.textContent=c?'/'+c:'/formulaire';
+  const mpbName=$('mpb-name'); if(mpbName) mpbName.textContent=nm||'Sans titre';
 }
 function sanitizeCmd(el){ el.value=el.value.toLowerCase().replace(/[^a-z0-9_]/g,''); updateMeta(); scheduleSave(); }
 function onTypeChange()  { $('quiz-cfg').style.display=$('f-type')?.value==='quiz'?'block':'none'; scheduleSave(); }
@@ -2030,8 +2108,8 @@ function onTriggerChange(){ const sel=$('f-trigger'),wrap=$('trigger-date-wrap')
    TEMPLATES
    ════════════════════════════════════════════════════ */
 const TPLS = {
-  inscription:{ name:'Onboarding Forex', cmd:'start', type:'inscription', intro:'Bonjour +prenom ! 👋\n\nBienvenue dans la communauté Felipe Bot.', outro:'✅ Bienvenue +prenom !', fields:[{type:'text',label:'Quel est ton prénom ?',ph:'Marc',required:true,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''},{type:'email',label:'Ton adresse email ?',ph:'marc@gmail.com',required:true,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''},{type:'qcm',label:'Ton niveau en trading ?',required:true,quiz:false,opts:[{t:'🟢 Débutant',c:false,pts:10},{t:'🟡 Intermédiaire',c:false,pts:10},{t:'🔴 Expert',c:false,pts:10}],correctAnswer:null,pts:10,expl:''},{type:'long',label:'Quel est ton objectif principal ?',ph:'Ex: viser +5% par mois',required:false,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''}]},
-  sondage:{ name:'Sondage satisfaction', cmd:'sondage', type:'sondage', intro:'📊 Sondage de satisfaction\n\n3 questions rapides.', outro:'🙏 Merci +prenom !', fields:[{type:'note5',label:'Note la qualité des signaux cette semaine (1 à 5) ?',required:true,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''},{type:'nps',label:'Sur 10, tu recommanderais Felipe Bot à un ami ?',required:true,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''},{type:'qcm',label:"Qu'est-ce que tu apprécies le plus ?",required:true,quiz:false,opts:[{t:'📈 Les signaux',c:false,pts:10},{t:'💬 Le support',c:false,pts:10},{t:'📚 La formation',c:false,pts:10}],correctAnswer:null,pts:10,expl:''}]},
+  inscription:{ name:'Onboarding Forex', cmd:'start', type:'inscription', intro:'Bonjour +prenom ! 👋\n\nBienvenue dans la communauté TradingBot.', outro:'✅ Bienvenue +prenom !', fields:[{type:'text',label:'Quel est ton prénom ?',ph:'Marc',required:true,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''},{type:'email',label:'Ton adresse email ?',ph:'marc@gmail.com',required:true,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''},{type:'qcm',label:'Ton niveau en trading ?',required:true,quiz:false,opts:[{t:'🟢 Débutant',c:false,pts:10},{t:'🟡 Intermédiaire',c:false,pts:10},{t:'🔴 Expert',c:false,pts:10}],correctAnswer:null,pts:10,expl:''},{type:'long',label:'Quel est ton objectif principal ?',ph:'Ex: viser +5% par mois',required:false,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''}]},
+  sondage:{ name:'Sondage satisfaction', cmd:'sondage', type:'sondage', intro:'📊 Sondage de satisfaction\n\n3 questions rapides.', outro:'🙏 Merci +prenom !', fields:[{type:'note5',label:'Note la qualité des signaux cette semaine (1 à 5) ?',required:true,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''},{type:'nps',label:'Sur 10, tu recommanderais TradingBot à un ami ?',required:true,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''},{type:'qcm',label:"Qu'est-ce que tu apprécies le plus ?",required:true,quiz:false,opts:[{t:'📈 Les signaux',c:false,pts:10},{t:'💬 Le support',c:false,pts:10},{t:'📚 La formation',c:false,pts:10}],correctAnswer:null,pts:10,expl:''}]},
   quiz:{ name:'Quiz Analyse Technique', cmd:'quiz', type:'quiz', intro:'📚 Quiz Analyse Technique\n\nBonjour +prenom ! 4 questions. Bonne chance ! 🎯', outro:'🎉 Quiz terminé +prenom !\n\nTon score : +score / +total', fields:[{type:'qcm',label:"Qu'est-ce qu'un Doji indique ?",required:true,quiz:true,expl:'Le Doji = indécision.',opts:[{t:'Indécision du marché',c:true,pts:10},{t:'Tendance haussière forte',c:false,pts:0},{t:'Signal de vente fiable',c:false,pts:0}],correctAnswer:null,pts:10},{type:'qcm',label:'Le RSI à 75 signifie que le marché est :',required:true,quiz:true,expl:'RSI > 70 = suracheté.',opts:[{t:'Suracheté 🔴',c:true,pts:10},{t:'Survendu 🟢',c:false,pts:0},{t:'Neutre ⚪',c:false,pts:0}],correctAnswer:null,pts:10},{type:'oui_non',label:'Le croisement MA20/MA50 à la hausse est-il haussier ?',required:true,quiz:true,correctAnswer:'oui',expl:'Oui — signal classique.',opts:[],pts:10}]},
   journal:{ name:'Journal de trading hebdo', cmd:'journal', type:'journal', intro:'📓 Journal — Semaine du +date\n\nBonjour +prenom !', outro:'✅ Journal enregistré +prenom !', fields:[{type:'qcm',label:'Quelle paire as-tu principalement tradée ?',required:true,quiz:false,opts:[{t:'EUR/USD',c:false,pts:10},{t:'GBP/USD',c:false,pts:10},{t:'XAU/USD',c:false,pts:10},{t:'BTC/USD',c:false,pts:10}],correctAnswer:null,pts:10,expl:''},{type:'note5',label:'Note ta discipline cette semaine (1 à 5) ?',required:true,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''},{type:'number',label:'Combien de trades as-tu réalisés ?',ph:'5',required:true,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''},{type:'long',label:'Tes notes et observations',ph:"Qu'as-tu appris cette semaine ?",required:false,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''}]},
   temoignage:{ name:'Témoignage performance', cmd:'temoignage', type:'temoignage', intro:'⭐ Partage ton témoignage +prenom !', outro:'✨ Merci +prenom ! 🚀', fields:[{type:'note5',label:'Sur 5, quelle note donnes-tu à notre méthode ?',required:true,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''},{type:'long',label:'Décris ta meilleure performance récente 📈',ph:'Ex: +4.2% sur EUR/USD…',required:true,quiz:false,opts:[],correctAnswer:null,pts:10,expl:''}]},
