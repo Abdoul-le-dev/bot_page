@@ -521,7 +521,7 @@ select.inp   { cursor: pointer; }
 .responses-filters { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
 
 /* Modal détail réponses */
-.resp-detail-grid { display: grid; grid-template-columns: 260px 1fr; gap: 0; height: 100%; min-height: 520px; max-height: 78vh; overflow: hidden; }
+.resp-detail-grid { display: grid; grid-template-columns: 260px 1fr; gap: 0; flex: 1; min-height: 0; overflow: hidden; }
 .resp-sidebar { border-right: 1px solid rgba(255,255,255,.07); overflow-y: auto; padding: 0; }
 .resp-sidebar-head { padding: 14px 16px 10px; border-bottom: 1px solid rgba(255,255,255,.06); position: sticky; top: 0; background: #111113; z-index: 1; }
 .resp-sidebar-title { font-size: 11px; color: var(--txt-4); text-transform: uppercase; letter-spacing: .07em; font-weight: 500; margin-bottom: 6px; }
@@ -534,7 +534,7 @@ select.inp   { cursor: pointer; }
 .resp-user-name  { font-size: 12px; color: var(--txt); font-weight: 500; }
 .resp-user-meta  { font-size: 10px; color: var(--txt-4); margin-top: 1px; }
 .resp-user-score { margin-left: auto; font-size: 11px; font-weight: 600; flex-shrink: 0; }
-.resp-content      { display: flex; flex-direction: column; overflow: hidden; }
+.resp-content      { display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
 .resp-content-head { padding: 14px 18px 12px; border-bottom: 1px solid rgba(255,255,255,.06); display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .resp-content-body { flex: 1; overflow-y: auto; padding: 14px 18px; display: flex; flex-direction: column; gap: 10px; }
 .resp-empty-state  { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--txt-5); gap: 8px; }
@@ -556,7 +556,7 @@ select.inp   { cursor: pointer; }
 .ans-file-dl { display: flex; align-items: center; gap: 10px; padding: 10px 12px; color: var(--sky); font-size: 12px; text-decoration: none; cursor: pointer; transition: background .12s; }
 .ans-file-dl:hover { background: rgba(56,189,248,.07); }
 .modal-xl { width: min(900px, 95vw); max-height: 88vh; display: flex; flex-direction: column; overflow: hidden; }
-.modal-xl .modal-body { padding: 0; flex: 1; overflow: hidden; }
+.modal-xl .modal-body { padding: 0; flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
 
 /* ════════════════════════════════════════════════════
    MODALS
