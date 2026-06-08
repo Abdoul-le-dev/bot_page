@@ -115,7 +115,7 @@
 
       <p class="text-[10px] font-medium text-zinc-700 uppercase tracking-wider px-2.5 pt-3 pb-1">Croissance</p>
       <a href="/tache" class="sb-link">
-        <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        <svg viewBox="0 0 24 24" stroke-width="1.5" class="w-3.5 h-3.5 flex-shrink-0" ><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
         Liens & Onboarding
       </a>
 
