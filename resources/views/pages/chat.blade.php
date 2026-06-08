@@ -236,16 +236,11 @@ input, textarea, select { font-family: inherit; }
 }
 
 #hamburger {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px; height: 30px;
-  flex-shrink: 0;
+  display: none; align-items: center; justify-content: center;
+  width: 30px; height: 30px; flex-shrink: 0;
   border-radius: var(--radius);
-  background: rgba(255,255,255,.05);
-  border: 1px solid var(--border);
-  color: var(--txt-4);
-  transition: all .15s;
+  background: rgba(255,255,255,.05); border: 1px solid var(--border);
+  color: var(--txt-4); transition: all .15s; cursor: pointer;
 }
 #hamburger:hover { color: var(--txt); background: rgba(255,255,255,.1); }
 #hamburger svg   { width: 15px; height: 15px; stroke: currentColor; fill: none; }
