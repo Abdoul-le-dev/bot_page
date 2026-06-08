@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TradingBot — Dashboard</title>
+  <title>Felipe Bot — Dashboard</title>
 
   <link rel="preconnect" href="https://fonts.bunny.net">
   <link href="https://fonts.bunny.net/css?family=geist:300,400,500,600&family=geist-mono:400,500" rel="stylesheet">
@@ -54,7 +54,7 @@
     <div class="flex items-center justify-between px-4 py-4 border-b border-white/5 flex-shrink-0">
       <div class="flex items-center gap-2">
         <div class="w-6 h-6 bg-amber-400/15 border border-amber-400/30 rounded-md flex items-center justify-center text-[11px]">⚡</div>
-        <span class="text-[13px] font-medium text-zinc-50">TradingBot</span>
+        <span class="text-[13px] font-medium text-zinc-50">Felipe Bot</span>
       </div>
       <!-- Bouton fermeture (mobile) -->
       <button id="sidebar-close"
