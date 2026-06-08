@@ -350,13 +350,13 @@ select.inp   { appearance: none; -webkit-appearance: none; cursor: pointer; }
 .cat-card-top {
   display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;
 }
-.cat-card-name-wrap { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.cat-card-name-wrap { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; overflow: hidden; }
 .cat-card-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .cat-card-name {
   font-size: 12px; font-weight: 500; color: #e4e4e7;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.cat-card-actions { display: flex; align-items: center; gap: 4px; }
+.cat-card-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
 .cat-card-count   { font-size: 18px; font-weight: 300; color: white; font-variant-numeric: tabular-nums; }
 .cat-card-trend   { font-size: 10px; }
 .cat-card-bottom  { display: flex; align-items: center; justify-content: space-between; }
@@ -589,6 +589,13 @@ select.inp   { appearance: none; -webkit-appearance: none; cursor: pointer; }
   #cat-detail { display: none; }
   #cat-left.hidden-mobile   { display: none; }
   #cat-detail.visible-mobile { display: flex; }
+
+  /* Cards mobile : padding plus compact, noms lisibles */
+  .cat-card-body  { padding: 8px 10px 8px 14px; }
+  .cat-card-count { font-size: 16px; }
+  #cat-list       { padding: 6px; gap: 3px; }
+  .stat-mini      { padding: 8px 4px; }
+  .stat-mini .stat-val { font-size: 14px; }
 
   #btn-back   { display: flex; }
 
