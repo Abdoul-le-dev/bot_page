@@ -342,29 +342,46 @@ select.inp   { appearance: none; -webkit-appearance: none; cursor: pointer; }
 .cat-card {
   border-radius: var(--radius-lg);
   background: var(--bg-2); border: 1px solid var(--border-2);
-  cursor: pointer; transition: all .15s; position: relative; overflow: hidden;
+  cursor: pointer; transition: all .15s;
+  position: relative; overflow: hidden;
+  flex-shrink: 0;
 }
-.cat-card:hover   { border-color: rgba(255,255,255,.1); background: rgba(255,255,255,.04); }
+.cat-card:hover    { border-color: rgba(255,255,255,.1); background: rgba(255,255,255,.04); }
 .cat-card.selected { border-color: rgba(56,189,248,.35); background: rgba(56,189,248,.05); }
-.cat-card-accent {
-  position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+.cat-card-accent   { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
+.cat-card-body     { padding: 10px 10px 10px 16px; }
+
+/* Ligne nom + actions : les deux dans la largeur disponible */
+.cat-card-top { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+.cat-card-name-wrap {
+  display: flex; align-items: center; gap: 5px;
+  flex: 1; min-width: 0; /* CRITIQUE : permet text-overflow:ellipsis */
 }
-.cat-card-body { padding: 10px 12px 10px 16px; }
-.cat-card-top {
-  display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;
-}
-.cat-card-name-wrap { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; overflow: hidden; }
-.cat-card-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.cat-card-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 .cat-card-name {
   font-size: 12px; font-weight: 500; color: #e4e4e7;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  flex: 1; min-width: 0;
 }
-.cat-card-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
-.cat-card-count   { font-size: 18px; font-weight: 300; color: white; font-variant-numeric: tabular-nums; }
-.cat-card-trend   { font-size: 10px; }
-.cat-card-bottom  { display: flex; align-items: center; justify-content: space-between; }
-.pbar { height: 2px; background: rgba(255,255,255,.06); border-radius: 99px; margin-top: 6px; overflow: hidden; }
+.cat-card-actions {
+  display: flex; align-items: center; gap: 3px;
+  flex-shrink: 0; margin-left: 2px;
+}
+
+/* Ligne compteur + tendance */
+.cat-card-bottom { display: flex; align-items: baseline; justify-content: space-between; gap: 4px; }
+.cat-card-count  { font-size: 17px; font-weight: 300; color: white; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+.cat-card-trend  { font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.pbar      { height: 2px; background: rgba(255,255,255,.06); border-radius: 99px; margin-top: 6px; overflow: hidden; }
 .pbar-fill { height: 100%; border-radius: 99px; transition: width .3s var(--ease); }
+
+/* Mobile : masquer les actions sur la carte (édition/suppression accessibles via header détail) */
+@media (max-width: 768px) {
+  .cat-card-actions { display: none; }
+  .cat-card-body    { padding: 9px 10px 9px 14px; }
+  .cat-card-count   { font-size: 16px; }
+}
 
 /* Trigger pill */
 .trigger-pill {
@@ -594,11 +611,9 @@ select.inp   { appearance: none; -webkit-appearance: none; cursor: pointer; }
   #cat-left.hidden-mobile   { display: none; }
   #cat-detail.visible-mobile { display: flex; }
 
-  /* Cards mobile : padding plus compact, noms lisibles */
-  .cat-card-body  { padding: 8px 10px 8px 14px; }
-  .cat-card-count { font-size: 16px; }
-  #cat-list       { padding: 6px; gap: 3px; }
-  .stat-mini      { padding: 8px 4px; }
+  /* cat-list mobile compact */
+  #cat-list  { padding: 6px; gap: 3px; }
+  .stat-mini { padding: 8px 4px; }
   .stat-mini .stat-val { font-size: 14px; }
 
   #btn-back   { display: flex; }
