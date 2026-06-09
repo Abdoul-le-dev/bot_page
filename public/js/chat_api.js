@@ -3,7 +3,7 @@
    Tous les fetch vers l'API. Aucune logique UI ici.
    ══════════════════════════════════════════════════════════════════════ */
 
-const API_BASE = 'https://fdkvip.com/chat'
+const API_BASE = 'https://52.90.21.131:8000/chat'
 
 async function _request(method, path, body = null, isFormData = false) {
   const opts = {

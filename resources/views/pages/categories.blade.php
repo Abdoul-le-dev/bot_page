@@ -1341,7 +1341,7 @@ function dropMember(e) {
 /* ═══════════════════════════════════════════
    API — categories_api.js
    ═══════════════════════════════════════════ */
-const API_URL = 'https://fdkvip.com';
+const API_URL = 'https://52.90.21.131';
 
 async function apiFetch(path, options = {}) {
   const res = await fetch(API_URL + path, {

@@ -867,8 +867,8 @@ function formatAction(a) {
 /* ═══════════════════════════════════════════
    CONFIG API
    ═══════════════════════════════════════════ */
-const API_G = 'https://fdkvip.com/growth';
-const API_B = 'https://fdkvip.com';
+const API_G = 'https://52.90.21.131/growth';
+const API_B = 'https://52.90.21.131.com';
 
 async function apiFetch(url, opts={}) {
   const res = await fetch(url, { headers:{'Content-Type':'application/json'}, ...opts });
