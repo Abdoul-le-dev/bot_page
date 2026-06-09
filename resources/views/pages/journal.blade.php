@@ -715,9 +715,9 @@ textarea.input { resize: vertical; min-height: 60px; }
 </div>
 
 <script>
-const API      = 'http://52.90.21.131:8000/trading'
-const GOLD_API = 'http://52.90.21.131:8000/gold'
-const API_URL  = 'http://52.90.21.131:8000'
+const API      = 'https://fdkvip.com/trading'
+const GOLD_API = 'https://fdkvip.com/gold'
+const API_URL  = 'https://fdkvip.com'
 
 let goldDir        = 'buy'
 let goldConfidence = 3

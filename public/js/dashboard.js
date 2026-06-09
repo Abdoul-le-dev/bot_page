@@ -2,7 +2,7 @@
    dashboard.js — TradingBot Dashboard
    ═══════════════════════════════════════════════════════════ */
 
-const API_URL = 'http://52.90.21.131:8000/'
+const API_URL = 'https://fdkvip.com'
 
 /* ─── API ─────────────────────────────────────────────────── */
 async function apiFetch(path) {

@@ -1305,7 +1305,7 @@ select.inp   { cursor: pointer; }
      SCRIPTS
      ══════════════════════════════════════════════ -->
 <script>
-const API_URL = window.API_URL || 'https://52.90.21.131.com'
+const API_URL = window.API_URL || 'https://fdkvip.com'
 
 /* ════════════════════════════════════════════════
    SIDEBAR

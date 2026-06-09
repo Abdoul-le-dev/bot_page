@@ -153,7 +153,7 @@ function renderReplyQuote(msg) {
     </div>`
 }
 
-const MEDIA_BASE = 'http://52.90.21.131:8000'
+const MEDIA_BASE = 'https://fdkvip.com'
 
 function renderMediaContent(msg) {
   if (!msg.media_url) return ''

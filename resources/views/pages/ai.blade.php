@@ -616,7 +616,7 @@ function toast(msg, type = 'success', dur = 2800) {
 /* ═══════════════════════════════════════════
    API
    ═══════════════════════════════════════════ */
-const API = 'https://52.90.21.131/ia-config';
+const API = 'https://fdkvip.com/ia-config';
 
 async function apiFetch(path, opts = {}) {
   const res = await fetch(API + path, {
