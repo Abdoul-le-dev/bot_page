@@ -36,6 +36,10 @@ Route::middleware(['auth'])->group(function () {
         return view('pages.message');
     })->name('message');
 
+    Route::get('/relance', function () {
+        return view('pages.relances');
+    })->name('message');
+
 
 
     Route::get('/categorie',function () {return view('pages.categories');})->name('categories');
