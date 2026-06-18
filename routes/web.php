@@ -36,7 +36,7 @@ Route::middleware(['auth'])->group(function () {
         return view('pages.message');
     })->name('message');
 
-    Route::get('/relance', function () {
+    Route::get('/relances', function () {
         return view('pages.relances');
     })->name('message');
 
