@@ -122,6 +122,14 @@
         Liens & Onboarding
       </a>
 
+      <a href="/relances" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[13px] text-zinc-300 bg-white/[0.04] transition-all" id="nav-relances">
+        <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+          <path d="M21 12a9 9 0 1 1-3.5-7.1M21 4v6h-6"/>
+        </svg>
+        Relances
+        <span class="ml-auto text-[11px] text-zinc-500" id="sb-relances-badge">—</span>
+      </a>
+
       <p class="text-[10px] font-medium text-zinc-700 uppercase tracking-wider px-2.5 pt-3 pb-1">Outils</p>
 
       <a href="/form"
