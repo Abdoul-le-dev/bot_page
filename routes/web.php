@@ -43,6 +43,7 @@ Route::middleware(['auth'])->group(function () {
 
 
     Route::get('/categorie',function () {return view('pages.categories');})->name('categories');
+    Route::get('/categories',function () {return view('pages.categories');})->name('categories');
     Route::get('/chat',function () {return view('pages.chat');})->name('chat');
 
     
